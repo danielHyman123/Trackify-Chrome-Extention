@@ -1,0 +1,13 @@
+{
+	"folders": [
+		{
+			"path": "../Website"
+		},
+		{
+			"path": "../fonts"
+		}
+	],
+	"settings": {
+		"liveServer.settings.multiRootWorkspaceName": "fonts"
+	}
+}
