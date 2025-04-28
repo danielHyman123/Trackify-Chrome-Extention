@@ -11,6 +11,9 @@ body {
   right: 0;
   top: 0;
   background-color: #111;
+  color: white;
+  overflow-y: auto;
+  z-index: 9999;
   padding-top: 20px;
   display: none; /* Hidden by default */
 }
