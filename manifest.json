@@ -3,8 +3,10 @@
     "name": "My First Extension",
     "version": "1.0",
     "description": "This is my first Chrome extension!",
-    "permissions": [],
-    "action": {
+    "permissions": ["activeTab", "contextMenus"],
+    "background": {
+      "service_worker": "background.js"
+    },"action": {
       "default_popup": "index.html",
       "default_icon": "icon.png"
     }, "icons": {
