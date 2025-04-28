@@ -18,25 +18,6 @@ body {
   display: none; /* Hidden by default */
 }
 
-/* .sidebar a {
-  display: block;
-  color: white;
-  padding: 15px;
-  text-decoration: none;
-}
-
-.sidebar a:hover {
-  background-color: #575757;
-} */
-
-.sidebar h1 {
-  display: block;
-  color: white;
-  padding: 15px;
-  text-decoration: none;
-  text-align: center;
-}
-
 /* Button styling */
 #toggleButton {
   position: fixed;
@@ -44,4 +25,10 @@ body {
   right: 270px;
   padding: 10px 15px;
   font-size: 16px;
+  background-color: #4CAF50;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  z-index: 10000;
 }
