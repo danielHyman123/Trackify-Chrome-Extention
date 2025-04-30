@@ -32,3 +32,10 @@ body {
   cursor: pointer;
   z-index: 10000;
 }
+
+/* {
+  "matches": ["<all_urls>"],
+  "js": ["script/sidebar.js"],
+  "css": ["css/sidebar.css"]
+}
+] */
