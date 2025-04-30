@@ -1,0 +1,41 @@
+body {
+  margin: 0;
+  font-family: Arial, sans-serif;
+}
+
+/* Sidebar styling */
+.sidebar {
+  height: 100vh;
+  width: 250px;
+  position: fixed;
+  right: 0;
+  top: 0;
+  background-color: #111;
+  color: white;
+  overflow-y: auto;
+  z-index: 9999;
+  padding-top: 20px;
+  display: none; /* Hidden by default */
+}
+
+/* Button styling */
+#toggleButton {
+  position: fixed;
+  top: 20px;
+  right: 270px;
+  padding: 10px 15px;
+  font-size: 16px;
+  background-color: #4CAF50;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  z-index: 10000;
+}
+
+/* {
+  "matches": ["<all_urls>"],
+  "js": ["script/sidebar.js"],
+  "css": ["css/sidebar.css"]
+}
+] */
