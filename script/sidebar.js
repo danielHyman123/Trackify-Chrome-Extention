@@ -11,23 +11,35 @@ window.addEventListener('load', function() {
   sidebar.style.display = 'none'; // hide by default
   document.body.appendChild(sidebar);
 
-  // Create toggle button
-  const toggleButton = document.createElement('button');
-  toggleButton.id = 'toggleButton';
-  toggleButton.innerText = 'Toggle Sidebar';
-  document.body.appendChild(toggleButton);
-
-  // Toggle logic
-  toggleButton.addEventListener('click', function () {
-    if (sidebar.style.display === 'none' || sidebar.style.display === '') {
+  document.getElementById('toggleSidebar').addEventListener('click', function() {
+    if (sidebar.style.display == 'none' || sidebar.style.display == '') {
       sidebar.style.display = 'block';
       document.documentElement.style.setProperty('margin-right', '250px', 'important');
-      document.body.style.setProperty('margin-right', '250px', 'important');
+      document.body.style.setProperty('margin-right', '250px', 'important')
     } else {
       sidebar.style.display = 'none';
       document.documentElement.style.setProperty('margin-right', '0px', 'important');
-      document.body.style.setProperty('margin-right', '0px', 'important');
+      document.body.style.setProperty('margin-right', '0px', 'important')
     }
   });
+
+  // Create toggle button
+  // const toggleButton = document.createElement('button');
+  // toggleButton.id = 'toggleButton';
+  // toggleButton.innerText = 'Toggle Sidebar';
+  // document.body.appendChild(toggleButton);
+
+  // Toggle logic
+  // toggleButton.addEventListener('click', function () {
+  //   if (sidebar.style.display === 'none' || sidebar.style.display === '') {
+  //     sidebar.style.display = 'block';
+  //     document.documentElement.style.setProperty('margin-right', '250px', 'important');
+  //     document.body.style.setProperty('margin-right', '250px', 'important');
+  //   } else {
+  //     sidebar.style.display = 'none';
+  //     document.documentElement.style.setProperty('margin-right', '0px', 'important');
+  //     document.body.style.setProperty('margin-right', '0px', 'important');
+  //   }
+  // });
 
 });
