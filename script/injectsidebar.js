@@ -1,8 +1,17 @@
 if (!document.getElementById('myExtensionSidebar')) {
     const sidebar = document.createElement('div');
-    sidebar.className = 'sidebar';
     sidebar.id = 'myExtensionSidebar';
-    // sidebar.style.paddingLeft = '0px';
+    sidebar.style.position = 'fixed';
+    sidebar.style.top = '0';
+    sidebar.style.right = '0';
+    sidebar.style.width = '250px';
+    sidebar.style.height = '100vh';
+    sidebar.style.backgroundColor = '#555';
+    sidebar.style.color = 'white';
+    sidebar.style.padding = '10px';
+    sidebar.style.zIndex = '9999';
+    sidebar.style.marginLeft = '0px';
+    //sidebar.style.paddingLeft = '0px';
     sidebar.innerHTML = `
       <h1>Notes</h1>
       <input type="text" placeholder="Write here..." style="width: 90%; margin: 10px;">
