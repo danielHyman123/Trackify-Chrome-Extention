@@ -1,13 +1,12 @@
-#notes{
+.container{
     display: flex;
     justify-content: center; /* horizontal centering */
     align-items: center;     /* vertical centering */
 
     text-align: left;
-    height: 100vh;
+    height: 80vh;
     width: 100vw;
     box-sizing: border-box;
     resize: none;
     line-height: 1.5;
-    
 }
