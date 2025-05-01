@@ -3,7 +3,19 @@ but = document.getElementById("createNoteButton")
 console.log(createNoteButton);
 console.log(but);
 console.log("Button clicked");
+
+deleteButton = document.getElementsByTagName("button");
+del = document.getElementById("deleteButton")
+console.log(deleteButton);
+console.log(del);
+console.log("Button clicked");
+
 but.addEventListener('click', () => { //() => is an on the spot function creator.
-    window.open("notes.html", "NoteTaker", "width=600,height=400");
+    const notesWindow = window.open("notes.html", "NoteTaker", "width=600,height=400");
     console.log("Button clicked again");
+    
+    del.addEventListener('click', () => { //() => is an on the spot function creator.
+      notesWindow.close();
+      console.log("Button clicked again");
+     });
  });

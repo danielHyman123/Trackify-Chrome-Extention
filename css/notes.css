@@ -10,3 +10,21 @@
     resize: none;
     line-height: 1.5;
 }
+
+.buttons{
+    background-color: lightblue;
+    color: black
+}
+    
+.buttons:hover {
+    background-color: gray;
+    color: black;
+    cursor: pointer;
+}
+.buttons:active {
+    background-color: darkgray;
+    color: black;
+    border-color: red;
+    /* cursor: pointer; */
+
+}
