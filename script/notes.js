@@ -40,6 +40,7 @@ document.addEventListener('DOMContentLoaded', () => {
   
     //This function displays the text in <p> list
     function addTextToDOM(text) {
+        const listWindow = window.open("list.html", "List", "width=200,height=400");
       const button = document.createElement('button');
       button.textContent = text;
       textList.appendChild(button);
