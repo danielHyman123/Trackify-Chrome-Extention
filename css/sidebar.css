@@ -39,3 +39,8 @@ body {
   "css": ["css/sidebar.css"]
 }
 ] */
+
+#notesList{
+  border:red;
+  color: white;
+}
