@@ -13,6 +13,9 @@ if (!document.getElementById('myExtensionSidebar')) {
     sidebar.innerHTML = `
       <h1>Notes</h1>
       <input type="text" placeholder="Write here..." style="width: 90%; margin: 10px;">
+      <p>Hello</p>
+      <button id="textOutput"></button>
+    <script src="script/notes.js"></script>
     `;
     document.body.appendChild(sidebar);
     document.documentElement.style.marginRight = '250px';
