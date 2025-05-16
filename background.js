@@ -7,7 +7,14 @@ chrome.runtime.onInstalled.addListener(() => {
         contexts: ["selection"]
     })
     // start the notes value as an empty array to start
-    chrome.storage.local.set({notes: []})
+    let notes = chrome.storage.local.get('notes', (result) => {
+        if (result.notes == undefined) {
+            return [];
+        } else {
+            return result.notes;
+        }
+    })
+    chrome.storage.local.set({notes: JSON.stringify(notes)});
 })
 
 
@@ -23,12 +30,20 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
         case "saveNote":
             // adding new note to the notes array from local storage
             chrome.storage.local.get('notes', (result) => {
-                let notes = result.notes || [];
+                let notes = JSON.parse(result.notes);
                 notes.push(request.data);
-                chrome.storage.local.set({"notes": notes}, () => console.log("Note saved"));
+                console.log('note is ', request.data)
+                chrome.storage.local.set({"notes": JSON.stringify(notes)});
             })
             sendResponse({message: "Note saved from background"});
             return true;
             break;
-    }
+        case "getNotes":
+            chrome.storage.local.get('notes', result => {
+                console.log('the notes are', result.notes);
+                sendResponse({notes: JSON.parse(result.notes)});
+            });
+            return true;
+            break;
+    };
 })

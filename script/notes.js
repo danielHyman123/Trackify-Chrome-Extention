@@ -1,8 +1,12 @@
-let note_area = document.getElementById("note_area");
-let save_but = document.getElementById("saveButton");
+import {Note} from "./note.js";
+const note_area = document.getElementById("note_area");
+const save_but = document.getElementById("saveButton");
+const title = document.getElementById("title_area");
 save_but.addEventListener('click', () => {
-    sendNote(note_area.value);
+    let newNote = new Note(title.value, note_area.value);
+    sendNote(JSON.stringify(newNote));
     note_area.value = '';
+    title.value = '';
 })
 
 /**
