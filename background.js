@@ -31,8 +31,9 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
             // adding new note to the notes array from local storage
             chrome.storage.local.get('notes', (result) => {
                 let notes = JSON.parse(result.notes);
-                notes.push(request.data);
-                console.log('note is ', request.data)
+                let newNote = request.data;
+                console.log('newNote is ', newNote)
+                notes.push(newNote);
                 chrome.storage.local.set({"notes": JSON.stringify(notes)});
             })
             sendResponse({message: "Note saved from background"});

@@ -29,13 +29,13 @@ if (!document.getElementById('myExtensionSidebar')) {
   getNotes().then((notes) => {
     newNotes = notes;
     // turning the notes into proper format
-    actual_notes = (!newNotes) ? newNotes.map(item => `title is ${item.title}, content is ${item.content} `).join('') : '<p>No Notes Yet</p>';
+    actual_notes = (newNotes) ? newNotes.map(item => `title is ${item.title}, content is ${item.content} \n`).join('') : '<p>No Notes Yet</p>';
     console.log('notes are: ', newNotes);
     // putting the notes in the sidebar
     sidebar.innerHTML = `
       <h1>Notes</h1>
       <input type="text" placeholder="Write here..." style="width: 90%; margin: 10px;">
-      <div>${newNotes}</div>
+      <div>${actual_notes}</div>
     `;
     document.body.appendChild(sidebar);
     document.documentElement.style.marginRight = '250px';
