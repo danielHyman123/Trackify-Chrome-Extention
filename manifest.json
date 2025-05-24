@@ -20,5 +20,9 @@
       "js": ["script/injectsidebar.js"],
       "css": ["css/sidebar.css"]
     }
+  ],
+  "host_permissions": [
+    "http://*/*",
+    "https://*/*"
   ]
 }
