@@ -20,7 +20,7 @@ document.addEventListener('DOMContentLoaded', () => {
         console.log("Button clicked");
         console.log('Input value: ' + input.value);
         const text = input.value.trim();
-        if (text === '') return;  
+        if (text === '') return;
         /*'==' compares values and converts types; '===' compares values and types(not type converstion)
         i.e. 0 == '0' is true as 0 is converted to string, 
          but 0 === '0' is false because number and strings are different types.
@@ -38,12 +38,17 @@ document.addEventListener('DOMContentLoaded', () => {
       });
     });
   
-    //This function displays the text in <p> list
+    //This function displays the text in list.html
     function addTextToDOM(text) {
-        const listWindow = window.open("list.html", "List", "width=200,height=400");
       const button = document.createElement('button');
       button.textContent = text;
-      textList.appendChild(button);
+  
+      const sidebar = document.getElementById('myExtensionSidebar');
+      if (sidebar) {
+          sidebar.appendChild(button);
+      } else {
+          console.warn('Sidebar not found');
+      }
     }
   });
 

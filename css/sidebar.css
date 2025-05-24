@@ -18,6 +18,20 @@ body {
   display: none; /* Hidden by default */
 }
 
+.sidebar button {
+  background-color: #4CAF50;
+  color: black;
+  border: none;
+  padding: 10px;
+  text-align: center;
+  text-decoration: none;
+  display: block;
+  margin: 10px auto;
+  cursor: pointer;
+  width: 80%;
+  font-size: 16px;
+}
+
 /* Button styling */
 #toggleButton {
   position: fixed;
@@ -39,8 +53,3 @@ body {
   "css": ["css/sidebar.css"]
 }
 ] */
-
-#notesList{
-  border:red;
-  color: white;
-}
