@@ -47,6 +47,12 @@ body {
   z-index: 10000;
 }
 
+#notesContainer {
+  padding: 20px;
+  color: white;
+  font-size: 16px;
+}
+
 /* {
   "matches": ["<all_urls>"],
   "js": ["script/sidebar.js"],

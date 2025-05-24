@@ -1,83 +1,109 @@
-/*
-Chrome storage API is used to store data in the browser. 
-It allows you to store data in a key-value pair format. 
-The data is stored in the browser's local storage and can be accessed by your extension.
-By: Daniel
-*/
+/* Chrome storage API is used to store data in the browser.
+   By: Daniel */
 
-document.addEventListener('DOMContentLoaded', () => {
-    const input = document.getElementById('containerID');
+// Check if we're in the popup/extension page context
+if (document.getElementById('containerID')) {
+    // This is the popup page - handle save button
+    const textarea = document.getElementById('containerID');
     const saveButton = document.getElementById('saveButton');
-    const textList = document.getElementById('textOutput');
-  
-    // Load saved inputs
-    chrome.storage.local.get({ inputs: [] }, (result) => {
-      result.inputs.forEach(addTextToDOM);
-    });
-  
-    // Save button handler
-    saveButton.addEventListener('click', () => {
-        console.log("Button clicked");
-        console.log('Input value: ' + input.value);
-        const text = input.value.trim();
-        if (text === '') return;
-        /*'==' compares values and converts types; '===' compares values and types(not type converstion)
-        i.e. 0 == '0' is true as 0 is converted to string, 
-         but 0 === '0' is false because number and strings are different types.
-        */
+    const deleteButton = document.getElementById('deleteButton');
 
-         //Retreive the current inputs from storage
-        chrome.storage.local.get({ inputs: [] }, (result) => {
-        const updatedInputs = [...result.inputs, text];
-  
-        //Add the new input, and save it back
-        chrome.storage.local.set({ inputs: updatedInputs }, () => {
-          addTextToDOM(text);
-          input.value = ''; // Clear input
-        });
-      });
-    });
-  
-    //This function displays the text in list.html
-    function addTextToDOM(text) {
-      const button = document.createElement('button');
-      button.textContent = text;
-  
-      const sidebar = document.getElementById('myExtensionSidebar');
-      if (sidebar) {
-          sidebar.appendChild(button);
-      } else {
-          console.warn('Sidebar not found');
-      }
-    }
-  });
-
-
-
-/*
-function saveNote(){
-    let txt = document.getElementById("containerID").value;
-    console.log("Button clicked");
-    console.log(txt);
-
-    // Save the note to Chrome storage
-    chrome.storage.sync.set({ note: txt }, () => {
-        console.log("Note saved:", txt);
-    });  
-
-    //Display note list on sidebar
-    chrome.storage.sync.get(null, function (items) {
-        const listDiv = document.getElementById("listDiv");
-        listDiv.innerHTML = ""; // Clear existing content
-      
-        for (let key in items) {
-          const entry = document.createElement("p");
-          entry.textContent = `${key}: ${items[key]}`;
-          listDiv.appendChild(entry);
+    // Load existing note content when page loads
+    chrome.storage.local.get(['currentNote'], (result) => {
+        if (result.currentNote) {
+            textarea.value = result.currentNote;
         }
-      });
+    });
 
+    // Save button handler for popup
+    saveButton.addEventListener('click', () => {
+        console.log("Save button clicked");
+        const noteText = textarea.value.trim();
+        if (noteText === '') return;
+
+        // Save to chrome storage
+        chrome.storage.local.get(['notes'], (result) => {
+            const notes = result.notes || [];
+            notes.push(noteText);
+            
+            chrome.storage.local.set({ 
+                notes: notes,
+                currentNote: '' // Clear current note after saving
+            }, () => {
+                console.log("Note saved:", noteText);
+                textarea.value = ''; // Clear textarea
+                
+                // Send message to content script to update sidebar
+                chrome.tabs.query({active: true, currentWindow: true}, (tabs) => {
+                    chrome.tabs.sendMessage(tabs[0].id, {
+                        type: 'new_note',
+                        note: noteText
+                    });
+                });
+            });
+        });
+    });
+
+    // Auto-save current text as user types (optional)
+    textarea.addEventListener('input', () => {
+        chrome.storage.local.set({ currentNote: textarea.value });
+    });
+
+    // Delete button handler
+    deleteButton.addEventListener('click', () => {
+        chrome.storage.local.set({ notes: [] }, () => {
+            console.log("All notes deleted");
+            // Send message to content script to clear sidebar
+            chrome.tabs.query({active: true, currentWindow: true}, (tabs) => {
+                chrome.tabs.sendMessage(tabs[0].id, {
+                    type: 'clear_notes'
+                });
+            });
+        });
+    });
 }
 
-saveButton.addEventListener('click', saveNote);
-*/
+// Function for saving notes in sidebar (called from injectsidebar.js)
+function initNotesUI() {
+    console.log("Initializing notes UI in sidebar");
+    const container = document.getElementById('notesContainer');
+    
+    if (!container) {
+        console.warn("notesContainer not found");
+        return;
+    }
+
+    // Load saved notes
+    chrome.storage.local.get(['notes'], (result) => {
+        const notes = result.notes || [];
+        container.innerHTML = ''; // Clear existing content
+        notes.forEach(note => addTextToDOM(note, container));
+    });
+}
+
+// Function displays the text in the sidebar
+function addTextToDOM(noteText, container) {
+    const btn = document.createElement('button');
+    btn.textContent = noteText;
+    btn.style.display = 'block';
+    btn.style.margin = '5px 0';
+    btn.style.width = '90%';
+    btn.style.padding = '8px';
+    btn.style.backgroundColor = '#333';
+    btn.style.color = 'white';
+    btn.style.border = '1px solid #555';
+    btn.style.borderRadius = '4px';
+    btn.style.cursor = 'pointer';
+    
+    // Add click handler to edit/copy note
+    btn.addEventListener('click', () => {
+        navigator.clipboard.writeText(noteText).then(() => {
+            btn.textContent = 'Copied!';
+            setTimeout(() => {
+                btn.textContent = noteText;
+            }, 1000);
+        });
+    });
+    
+    container.appendChild(btn);
+}
