@@ -8,6 +8,21 @@ but.addEventListener('click', () => { //() => is an on the spot function creator
     console.log("Button clicked again");
  });
 
+ 
+toggleSidebar = document.getElementsByTagName("toggleSidebar");
+bar = document.getElementById("toggleSidebar")
+console.log(toggleSidebar);
+console.log(bar);
+console.log("Button clicked");
+bar.addEventListener('click', async () => { //() => is an on the spot function creator.
+    const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
+  
+    chrome.scripting.executeScript({
+      target: { tabId: tab.id },
+      files: ['script/injectSidebar.js']
+    });
+});
+
 /*Code could be used for delete button*/ 
 
 // deleteButton = document.getElementsByTagName("button");

@@ -4,7 +4,6 @@
 if (!document.getElementById('myExtensionSidebar')) {
     // Toggle it on
     const sidebar = document.createElement('div');
-    sidebar.className = 'sidebar';
     sidebar.id = 'myExtensionSidebar';
     sidebar.style.position = 'fixed';
     sidebar.style.top = '0';
@@ -25,7 +24,7 @@ if (!document.getElementById('myExtensionSidebar')) {
     `;
     
     document.body.appendChild(sidebar);
-    document.documentElement.style.marginRight = '250px';
+    // document.documentElement.style.marginRight = '250px';
     document.body.style.marginRight = '250px';
     
     // Initialize the notes UI after sidebar is created
