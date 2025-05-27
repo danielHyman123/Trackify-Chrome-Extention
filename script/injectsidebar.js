@@ -6,7 +6,6 @@ window.SIDEBARWIDTH = 20;
 if (!document.getElementById('myExtensionSidebar')) {
     // Toggle it on
     const sidebar = document.createElement('div');
-    sidebar.className = 'sidebar';
     sidebar.id = 'myExtensionSidebar';
     sidebar.style.position = 'fixed';
     sidebar.style.top = '0';

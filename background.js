@@ -32,3 +32,10 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
             break;
     }
 })
+
+// document.addEventListener('keydown', function(e) {
+//   // Example: Alt + Shift + I
+//   if (e.altKey && e.shiftKey && e.key.toLowerCase() === 'u') {
+//     window.open(chrome.runtime.getURL('index.html'));
+//   }
+// });
