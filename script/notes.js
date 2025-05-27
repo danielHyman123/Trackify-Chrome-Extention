@@ -48,17 +48,4 @@ if (document.getElementById('containerID')) {
     textarea.addEventListener('input', () => {
         chrome.storage.local.set({ currentNote: textarea.value });
     });
-
-    // Delete button handler
-    deleteButton.addEventListener('click', () => {
-        chrome.storage.local.set({ notes: [] }, () => {
-            console.log("All notes deleted");
-            // Send message to content script to clear sidebar
-            chrome.tabs.query({active: true, currentWindow: true}, (tabs) => {
-                chrome.tabs.sendMessage(tabs[0].id, {
-                    type: 'clear_notes'
-                });
-            });
-        });
-    });
 }
