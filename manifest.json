@@ -15,9 +15,8 @@
     "48": "icon.png"
   },
   "content_scripts": [
-    {
+    { 
       "matches": ["<all_urls>"],
-      "js": ["script/injectsidebar.js"],
       "css": ["css/sidebar.css"]
     }
   ],
