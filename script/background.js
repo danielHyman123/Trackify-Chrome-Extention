@@ -10,32 +10,7 @@ chrome.runtime.onInstalled.addListener(() => {
     chrome.storage.local.set({notes: []})
 })
 
-
 chrome.contextMenus.onClicked.addListener((info, tab) => {
     console.log("clicked")
     console.log(info)
 });
-
-// listen for messages
-chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
-    //handlling different events from messages
-    switch(request.event) {
-        case "saveNote":
-            // adding new note to the notes array from local storage
-            chrome.storage.local.get('notes', (result) => {
-                let notes = result.notes || [];
-                notes.push(request.data);
-                chrome.storage.local.set({"notes": notes}, () => console.log("Note saved"));
-            })
-            sendResponse({message: "Note saved from background"});
-            return true;
-            break;
-    }
-})
-
-// document.addEventListener('keydown', function(e) {
-//   // Example: Alt + Shift + I
-//   if (e.altKey && e.shiftKey && e.key.toLowerCase() === 'u') {
-//     window.open(chrome.runtime.getURL('index.html'));
-//   }
-// });

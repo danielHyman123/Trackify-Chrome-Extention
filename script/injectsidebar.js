@@ -89,26 +89,6 @@ if (!document.getElementById('myExtensionSidebar')) {
     document.documentElement.style.marginRight = '';
     document.body.style.marginRight = '';
 }
-// Listen for messages from the popup/extension
-chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
-    console.log("Received message:", message);
-
-    const container = document.getElementById('notesContainer');
-    if (!container) {
-        console.warn("notesContainer not found");
-        return;
-    }
-
-    if (message.type === 'new_note') {
-        // Add the new note to the sidebar
-        addTextToDOM(message.note, container);
-        sendResponse({success: true});
-    } else if (message.type === 'clear_notes') {
-        // Clear all notes from sidebar
-        container.innerHTML = '';
-        sendResponse({success: true});
-    }
-});
 
 // initNotesUI function to load existing notes into the sidebar
 function initNotesUI() {

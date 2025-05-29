@@ -32,24 +32,6 @@ if (document.getElementById('containerID')) {
             }, () => {
                 console.log("Note saved:", noteText);
                 textarea.value = ''; // Clear textarea
-                
-                // Send message to content script to update sidebar with error handling
-                chrome.tabs.query({active: true, currentWindow: true}, (tabs) => {
-                    if (tabs[0]) {
-                        chrome.tabs.sendMessage(tabs[0].id, {
-                            type: 'new_note',
-                            note: noteText
-                        }, (response) => {
-                            // Handle the response or error. Since the sidebar might be closed and/or must be updated
-                            if (chrome.runtime.lastError) {
-                                console.log("Content script not ready:", chrome.runtime.lastError.message);
-                                console.log("Note saved successfully! Open the sidebar to see the update.");
-                            } else if (response && response.success) {
-                                console.log("Message sent successfully to sidebar");
-                            }
-                        });
-                    }
-                });
             });
         });
     });
