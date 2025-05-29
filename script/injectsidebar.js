@@ -78,6 +78,10 @@ if (!document.getElementById('myExtensionSidebar')) {
     
     // Initialize the notes UI after sidebar is created
     setTimeout(initNotesUI, 100); // Small delay to ensure DOM is ready
+    
+    //+ button click handler to open notes.html
+    plusButton.addEventListener('click', openNotes);
+
 } else {
     // Toggle it off
     document.getElementById('myExtensionSidebar').remove();
@@ -210,4 +214,14 @@ function addTextToDOM(noteText, container) {
     
     // Add markWrapper to container
     container.appendChild(markWrapper);
+}
+
+// Function called in event listener to the plus button to open notes.html
+function openNotes(){
+    const notesWindow = window.open(chrome.runtime.getURL("notes.html"), "NoteTaker", "width=600,height=400");
+    if (!notesWindow) {
+        console.error("Failed to open notes window. Please allow pop-ups for this site.");
+    } else {
+        console.log("Notes window opened successfully.");
+    }
 }
