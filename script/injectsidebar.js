@@ -46,6 +46,7 @@ if (!document.getElementById('myExtensionSidebar')) {
     plusButton.id = " plusButton"
     plusButton.textContent = '+';
     plusButton.style.border = '1px solid gray';
+    plusButton.style.color = 'white';
     plusButton.style.backgroundColor = '#333';
     plusButton.style.cursor = 'pointer';
     plusButton.style.padding = '4px 8px';

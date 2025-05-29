@@ -24,5 +24,11 @@
   "host_permissions": [
     "http://*/*",
     "https://*/*"
+  ],
+  "web_accessible_resources": [
+    {
+      "resources": ["notes.html"],
+      "matches": ["<all_urls>"]
+    }
   ]
 }
