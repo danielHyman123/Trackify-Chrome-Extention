@@ -1,14 +1,25 @@
 function getNotes() {
-    console.log("getting notes");
-    return new Promise((resolve, reject) => {
-        chrome.runtime.sendMessage({event: 'getNotes'}, (response) => {
-            if (chrome.runtime.lastError) {
-                reject(chrome.runtime.lastError);
-            } else {
-                resolve(response.notes);
-            }
-        });
+  console.log("getting notes");
+  return new Promise((resolve, reject) => {
+    chrome.runtime.sendMessage({ event: 'getNotes' }, (response) => {
+      if (chrome.runtime.lastError) {
+        reject(chrome.runtime.lastError);
+      } else {
+        resolve(response.notes);
+      }
     });
+  });
+}
+
+function createNoteCard({ title, content }) {
+  console.log("in the function, title and content are ", title, content);
+  const noteCard = document.createElement('li');
+  noteCard.className = 'note-card-item';
+  noteCard.innerHTML = `
+      <h2>${title}</h2>
+      <p>${content}</p>
+  `;
+  return noteCard;
 }
 
 if (!document.getElementById('myExtensionSidebar')) {
@@ -29,20 +40,28 @@ if (!document.getElementById('myExtensionSidebar')) {
   getNotes().then((notes) => {
     newNotes = notes;
     // turning the notes into proper format
-    actual_notes = (newNotes) ? newNotes.map(item => `title is ${item.title}, content is ${item.content} \n`).join('') : '<p>No Notes Yet</p>';
     console.log('notes are: ', newNotes);
     // putting the notes in the sidebar
     sidebar.innerHTML = `
       <h1>Notes</h1>
       <input type="text" placeholder="Write here..." style="width: 90%; margin: 10px;">
-      <div>${actual_notes}</div>
+      <ul id="notes-list"></ul>
     `;
     document.body.appendChild(sidebar);
+    const notesList = document.getElementById('notes-list');
+    if (notesList) {
+      newNotes.forEach(element => {
+        notesList.appendChild(createNoteCard(element));
+      });
+    } else {
+      notesList.innerHTML = '<li class="note-card-item">No notes yet</li>';
+    }
     document.documentElement.style.marginRight = '250px';
     document.body.style.marginRight = '250px';
-  })} else {
-    // Toggle it off
-    document.getElementById('myExtensionSidebar').remove();
-    document.documentElement.style.marginRight = '';
-    document.body.style.marginRight = '';
-  }
+  })
+} else {
+  // Toggle it off
+  document.getElementById('myExtensionSidebar').remove();
+  document.documentElement.style.marginRight = '';
+  document.body.style.marginRight = '';
+}

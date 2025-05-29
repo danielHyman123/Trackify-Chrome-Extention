@@ -33,6 +33,10 @@ body {
   z-index: 10000;
 }
 
+.note-card-item {
+  
+}
+
 /* {
   "matches": ["<all_urls>"],
   "js": ["script/sidebar.js"],
