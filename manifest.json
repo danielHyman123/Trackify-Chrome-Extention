@@ -5,7 +5,7 @@
   "description": "This is my first Chrome extension!",
   "permissions": ["activeTab", "contextMenus", "scripting", "storage"],
   "background": {
-    "service_worker": "background.js"
+    "service_worker": "script/background.js"
   },
   "action": {
     "default_popup": "index.html",

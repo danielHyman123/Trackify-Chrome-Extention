@@ -1,5 +1,8 @@
 /* Checks if the sidebar is already open
-   If it is, remove it. If not, create it. */
+   If it is, remove it. If not, create it. 
+
+   Creates new bookmark on sidebar when save button on notes.html is activated
+   Implements Delete button function for every bookmark*/  
 
 window.SIDEBARWIDTH = 20;
  
@@ -18,11 +21,13 @@ if (!document.getElementById('myExtensionSidebar')) {
     sidebar.style.zIndex = '9999';
     sidebar.style.boxSizing = 'border-box';
     sidebar.style.overflowY = 'auto';
-    
+    // sidebar.style.display = 'flex';
+
     sidebar.innerHTML = `
-        <h1 style="margin-top: 0; font-size: 18px;">My Notes</h1>
+        <h1 style="margin-top: 0; font-size: 18px;">My Notes</h1> 
+        <button id="plusNote" style="border: gray;">+</button>
         <p style="font-size: 12px; color: #ccc; margin-bottom: 15px;">Click notes to copy to clipboard</p>
-        <div id="notesContainer" style="margin-top: 10px;"></div>
+        <div id="notesContainer" style="margin-top: 10px;"></div>   
     `;
     
     document.body.appendChild(sidebar);
@@ -59,7 +64,7 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     }
 });
 
-// Copy of initNotesUI function for the sidebar context
+// initNotesUI function to load existing notes into the sidebar
 function initNotesUI() {
     console.log("Initializing notes UI in sidebar");
     const container = document.getElementById('notesContainer');
@@ -82,6 +87,7 @@ function addTextToDOM(noteText, container) {
     console.log("Adding note to sidebar:", noteText);
     
     // Create wrapper div to hold both note button and delete button
+    // Each pair of note and delete button bundle in one wapper
     const wrapper = document.createElement('div');
     wrapper.style.display = 'flex';
     wrapper.style.alignItems = 'center';
