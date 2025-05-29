@@ -84,7 +84,6 @@ if (!document.getElementById('myExtensionSidebar')) {
     document.documentElement.style.marginRight = '';
     document.body.style.marginRight = '';
 }
-try{
 // Listen for messages from the popup/extension
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     console.log("Received message:", message);
@@ -105,10 +104,6 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
         sendResponse({success: true});
     }
 });
-}
-catch (error) {
-    console.error("Error in message listener:", error);
-}
 
 // initNotesUI function to load existing notes into the sidebar
 function initNotesUI() {
