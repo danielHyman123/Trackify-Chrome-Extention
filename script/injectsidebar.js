@@ -11,11 +11,7 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     //Checks if the message is to refresh the sidebar
     if (message.action === 'refreshSidebar') {
         console.log("Received refresh request for note:", message.noteText);
-        const container = document.getElementById('notesContainer');
-        if (container) {
-            // Add the new note to the sidebar immediately
-            addTextToDOM(message.noteText, container);
-        }
+        initNotesUI(); // Call the function to refresh the sidebar UI
         sendResponse({success: true});  //Built-in chrome function which sends a response back to the sender(notes.js)
     }
 });
@@ -36,12 +32,6 @@ if (!document.getElementById('myExtensionSidebar')) {
     sidebar.style.zIndex = '9999';
     sidebar.style.boxSizing = 'border-box';
     sidebar.style.overflowY = 'auto';
-    // sidebar.innerHTML = `
-    //     <h1 id="sidebarTitle" style="margin-top: 0; font-size: 18px;">My Notes</h1> 
-    //     <button id="plusNote" style="border: gray;">+</button>
-    //     <p style="font-size: 12px; color: #ccc; margin-bottom: 15px;">Click notes to copy to clipboard</p>
-    //     <div id="notesContainer" style="margin-top: 10px;"></div>   
-    // `;    
 
     //Create top wrapper with title and plus button
     const topWrapper = document.createElement('div');
