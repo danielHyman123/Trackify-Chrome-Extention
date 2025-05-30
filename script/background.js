@@ -14,3 +14,25 @@ chrome.contextMenus.onClicked.addListener((info, tab) => {
     console.log("clicked")
     console.log(info)
 });
+
+chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
+    //If the message is to update the sidebar, inform injectSidebar.js to refresh the sidebar
+    if (message.action === 'updateSidebar') {
+        console.log("Background received update request for note:", message.noteText);
+        
+        // Forward the message to all active tabs
+        chrome.tabs.query({}, (tabs) => {
+            tabs.forEach(tab => {   //Loop through all tabs
+                chrome.tabs.sendMessage(tab.id, {
+                    action: 'refreshSidebar',
+                    noteText: message.noteText
+                }).catch((error) => {
+                    // Ignore errors for tabs that don't have the content script
+                    console.log(`Could not send message to tab ${tab.id}:`, error.message);
+                });
+            });
+        });
+        
+        sendResponse({success: true});
+    }
+});
