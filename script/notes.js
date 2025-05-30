@@ -6,7 +6,7 @@ if (document.getElementById('containerID')) {
     // This is the popup page - handle save button
     const textarea = document.getElementById('containerID');
     const saveButton = document.getElementById('saveButton');
-    const deleteButton = document.getElementById('deleteButton');
+    // const deleteButton = document.getElementById('deleteButton');
 
     // Load existing note content when page loads
     chrome.storage.local.get(['currentNote'], (result) => {
@@ -32,14 +32,6 @@ if (document.getElementById('containerID')) {
             }, () => {
                 console.log("Note saved:", noteText);
                 textarea.value = ''; // Clear textarea
-                
-                // Send message to content script to update sidebar
-                chrome.tabs.query({active: true, currentWindow: true}, (tabs) => {
-                    chrome.tabs.sendMessage(tabs[0].id, {
-                        type: 'new_note',
-                        note: noteText
-                    });
-                });
             });
         });
     });

@@ -5,7 +5,7 @@
   "description": "This is my first Chrome extension!",
   "permissions": ["activeTab", "contextMenus", "scripting", "storage"],
   "background": {
-    "service_worker": "background.js"
+    "service_worker": "script/background.js"
   },
   "action": {
     "default_popup": "index.html",
@@ -15,14 +15,19 @@
     "48": "icon.png"
   },
   "content_scripts": [
-    {
+    { 
       "matches": ["<all_urls>"],
-      "js": ["script/injectsidebar.js"],
       "css": ["css/sidebar.css"]
     }
   ],
   "host_permissions": [
     "http://*/*",
     "https://*/*"
+  ],
+  "web_accessible_resources": [
+    {
+      "resources": ["notes.html"],
+      "matches": ["<all_urls>"]
+    }
   ]
 }

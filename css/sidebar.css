@@ -1,7 +1,21 @@
+/*-This css file can later be updated to be used to style the sidebar and index.html files. 
+As of 05/27/2025, this file is not used in any file.
+Instead, the same styling functionalitites are used in injectSidebar.js through sidebar.style
+Additonally the html aspects of the sidebar are through sidebar.innerHTML
+For dependancies and minimizing the amount of code in each file, the css and html aspects of the js files should be dispersed*/
+
 body {
   margin: 0;
   font-family: Arial, sans-serif;
 }
+
+
+
+
+
+
+
+
 
 /* .sidebar {
   position: fixed;
@@ -15,10 +29,10 @@ body {
   z-index: 9999;
   margin-left: 0px;
 } */
-
+/*
 .sidebar button {
   background-color: #4CAF50;
-  color: black;
+  color: white;
   border: none;
   padding: 10px;
   text-align: center;
@@ -30,12 +44,11 @@ body {
   font-size: 16px;
 }
 
-/* Button styling */
 #toggleButton {
   position: fixed;
   top: 20px;
   right: 270px;
-  padding: 10px 15px;   
+  padding: 50px 15px;   
   font-size: 16px;
   background-color: #4CAF50;
   color: white;
@@ -44,10 +57,4 @@ body {
   cursor: pointer;
   z-index: 10000;
 }
-
-/* {
-  "matches": ["<all_urls>"],
-  "js": ["script/sidebar.js"],
-  "css": ["css/sidebar.css"]
-}
-] */
+ */

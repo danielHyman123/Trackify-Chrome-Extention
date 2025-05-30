@@ -22,16 +22,3 @@ bar.addEventListener('click', async () => { //() => is an on the spot function c
       files: ['script/injectSidebar.js']
     });
 });
-
-/*Code could be used for delete button*/ 
-
-// deleteButton = document.getElementsByTagName("button");
-// del = document.getElementById("deleteButton")
-// console.log(deleteButton);
-// console.log(del);
-// console.log("Button clicked");
-// del.addEventListener('click', () => { //() => is an on the spot function creator.
-//   notesWindow.close();
-//   console.log("Button clicked again");
-//  });
-

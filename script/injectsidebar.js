@@ -1,5 +1,8 @@
 /* Checks if the sidebar is already open
-   If it is, remove it. If not, create it. */
+   If it is, remove it. If not, create it. 
+
+   Creates new bookmark on sidebar when save button on notes.html is activated
+   Implements Delete button function for every bookmark*/  
 
 window.SIDEBARWIDTH = 20;
  
@@ -18,19 +21,68 @@ if (!document.getElementById('myExtensionSidebar')) {
     sidebar.style.zIndex = '9999';
     sidebar.style.boxSizing = 'border-box';
     sidebar.style.overflowY = 'auto';
-    
-    sidebar.innerHTML = `
-        <h1 style="margin-top: 0; font-size: 18px;">My Notes</h1>
-        <p style="font-size: 12px; color: #ccc; margin-bottom: 15px;">Click notes to copy to clipboard</p>
-        <div id="notesContainer" style="margin-top: 10px;"></div>
-    `;
-    
+    // sidebar.innerHTML = `
+    //     <h1 id="sidebarTitle" style="margin-top: 0; font-size: 18px;">My Notes</h1> 
+    //     <button id="plusNote" style="border: gray;">+</button>
+    //     <p style="font-size: 12px; color: #ccc; margin-bottom: 15px;">Click notes to copy to clipboard</p>
+    //     <div id="notesContainer" style="margin-top: 10px;"></div>   
+    // `;    
+
+    //Create top wrapper with title and plus button
+    const topWrapper = document.createElement('div');
+    topWrapper.style.display = 'flex';  //Insures elements inside this div will be side by side
+    topWrapper.style.alignItems = 'center';
+    topWrapper.style.margin = '5px 0';
+    topWrapper.style.justifyContent = 'space-between'; // space between title and button
+
+    //Create title 
+    const title = document.createElement('h1');
+    title.style.fontSize = '18px';
+    title.textContent = 'My Notes';
+    title.style.marginTop = '0';
+
+    //Create PLUS button
+    const plusButton = document.createElement('button');
+    plusButton.id = " plusButton"
+    plusButton.textContent = '+';
+    plusButton.style.border = '1px solid gray';
+    plusButton.style.color = 'white';
+    plusButton.style.backgroundColor = '#333';
+    plusButton.style.cursor = 'pointer';
+    plusButton.style.padding = '4px 8px';
+    plusButton.style.borderRadius = '4px';
+    plusButton.style.fontSize = '16px';
+
+    //Add title and + button to top wrapper
+    topWrapper.appendChild(title);
+    topWrapper.appendChild(plusButton);
+
+    //Create user instructions
+    const instructions = document.createElement('p');
+    instructions.textContent = 'Click notes to copy to clipboard';
+    instructions.style.fontSize = '12px';
+    instructions.style.color = '#ccc';
+    instructions.style.marginBottom = '15px';
+
+    // Create notes container
+    const notesContainer = document.createElement('div');
+    notesContainer.id = 'notesContainer';
+    notesContainer.style.marginTop = '10px';
+
+    //Append everything to sidebar
+    sidebar.appendChild(topWrapper);
+    sidebar.appendChild(instructions);
+    sidebar.appendChild(notesContainer);
+
     document.body.appendChild(sidebar);
-    // document.documentElement.style.marginRight = '250px';
     document.body.style.marginRight = window.SIDEBARWIDTH + 'vw';
     
     // Initialize the notes UI after sidebar is created
     setTimeout(initNotesUI, 100); // Small delay to ensure DOM is ready
+    
+    //+ button click handler to open notes.html
+    plusButton.addEventListener('click', openNotes);
+
 } else {
     // Toggle it off
     document.getElementById('myExtensionSidebar').remove();
@@ -38,28 +90,7 @@ if (!document.getElementById('myExtensionSidebar')) {
     document.body.style.marginRight = '';
 }
 
-// Listen for messages from the popup/extension
-chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
-    console.log("Received message:", message);
-
-    const container = document.getElementById('notesContainer');
-    if (!container) {
-        console.warn("notesContainer not found");
-        return;
-    }
-
-    if (message.type === 'new_note') {
-        // Add the new note to the sidebar
-        addTextToDOM(message.note, container);
-        sendResponse({success: true});
-    } else if (message.type === 'clear_notes') {
-        // Clear all notes from sidebar
-        container.innerHTML = '';
-        sendResponse({success: true});
-    }
-});
-
-// Copy of initNotesUI function for the sidebar context
+// initNotesUI function to load existing notes into the sidebar
 function initNotesUI() {
     console.log("Initializing notes UI in sidebar");
     const container = document.getElementById('notesContainer');
@@ -82,11 +113,12 @@ function addTextToDOM(noteText, container) {
     console.log("Adding note to sidebar:", noteText);
     
     // Create wrapper div to hold both note button and delete button
-    const wrapper = document.createElement('div');
-    wrapper.style.display = 'flex';
-    wrapper.style.alignItems = 'center';
-    wrapper.style.margin = '5px 0';
-    wrapper.style.gap = '5px';
+    // Each pair of note and delete button bundle in one wapper
+    const markWrapper = document.createElement('div');
+    markWrapper.style.display = 'flex';
+    markWrapper.style.alignItems = 'center';
+    markWrapper.style.margin = '5px 0';
+    markWrapper.style.gap = '5px';
     
     // Create the note button
     const btn = document.createElement('button');
@@ -100,7 +132,6 @@ function addTextToDOM(noteText, container) {
     btn.style.cursor = 'pointer';
     btn.style.fontSize = '12px';
     btn.style.textAlign = 'left';
-    // btn.style.wordWrap = 'break-word';
     btn.style.overflow = 'hidden';
     btn.style.textOverflow = 'ellipsis';
     
@@ -136,7 +167,13 @@ function addTextToDOM(noteText, container) {
     deleteBtn.style.fontWeight = 'bold';
     
     // Add click handler for delete button
-    deleteBtn.addEventListener('click', (e) => {
+    deleteBtn.addEventListener('click', (e) => {        
+        /*e is short for event (I could also write (event) => {...} — it's the same thing)
+        It contains details about the event that occurred:
+            What type of event it was (click)
+            What element triggered it
+            Mouse position
+            Whether modifier keys (Ctrl, Shift, etc.) were pressed, etc*/
         e.stopPropagation();
         console.log("Delete button clicked for:", noteText);
         
@@ -147,15 +184,25 @@ function addTextToDOM(noteText, container) {
             
             chrome.storage.local.set({ notes: updatedNotes }, () => {
                 console.log("Note deleted from storage:", noteText);
-                wrapper.remove(); // Remove the entire wrapper (note + delete button)
+                markWrapper.remove(); // Remove the entire wrapper (note + delete button)
             });
         });
     });
     
     // Add both buttons to wrapper
-    wrapper.appendChild(btn);
-    wrapper.appendChild(deleteBtn);
+    markWrapper.appendChild(btn);
+    markWrapper.appendChild(deleteBtn);
     
-    // Add wrapper to container
-    container.appendChild(wrapper);
+    // Add markWrapper to container
+    container.appendChild(markWrapper);
+}
+
+// Function called in event listener to the plus button to open notes.html
+function openNotes(){
+    const notesWindow = window.open(chrome.runtime.getURL("notes.html"), "NoteTaker", "width=600,height=400");
+    if (!notesWindow) {
+        console.error("Failed to open notes window. Please allow pop-ups for this site.");
+    } else {
+        console.log("Notes window opened successfully.");
+    }
 }
