@@ -15,7 +15,12 @@ chrome.contextMenus.onClicked.addListener((info, tab) => {
     console.log(info)
 
     //Open notes.html as a popup when the notes button is clicked after right clicking
-    chrome.windows.create({ url: chrome.runtime.getURL('notes.html')}, "NoteTaker", "width=600,height=400");
+    chrome.windows.create({
+        url: chrome.runtime.getURL('notes.html'),
+        type: "popup", 
+        width:600,
+        height:600
+    });
 });
 
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
