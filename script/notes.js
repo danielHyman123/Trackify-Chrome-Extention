@@ -32,8 +32,14 @@ if (document.getElementById('containerID')) {
             }, () => {
                 console.log("Note saved:", noteText);
                 textarea.value = ''; // Clear textarea
+
+                // Send message to background script to update sidebar
+                chrome.runtime.sendMessage({
+                    action: 'updateSidebar',
+                    noteText: noteText
+                });
             });
-        });
+        }); 
     });
 
     // Auto-save current text as user types (optional)

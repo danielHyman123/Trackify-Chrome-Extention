@@ -4,8 +4,23 @@
    Creates new bookmark on sidebar when save button on notes.html is activated
    Implements Delete button function for every bookmark*/  
 
-window.SIDEBARWIDTH = 20;
- 
+window.SIDEBARWIDTH = 20; 
+
+// Listen for messages from background script
+chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
+    //Checks if the message is to refresh the sidebar
+    if (message.action === 'refreshSidebar') {
+        console.log("Received refresh request for note:", message.noteText);
+        const container = document.getElementById('notesContainer');
+        if (container) {
+            // Add the new note to the sidebar immediately
+            addTextToDOM(message.noteText, container);
+        }
+        sendResponse({success: true});  //Built-in chrome function which sends a response back to the sender(notes.js)
+    }
+});
+
+
 if (!document.getElementById('myExtensionSidebar')) {
     // Toggle it on
     const sidebar = document.createElement('div');
