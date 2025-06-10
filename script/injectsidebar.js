@@ -114,8 +114,8 @@ function initNotesUI() {
 }
 
 // Updated addTextToDOM function with delete functionality
-function addTextToDOM(noteText, container) {
-    console.log("Adding note to sidebar:", noteText);
+function addTextToDOM(noteObj, container) {
+    console.log("Adding note to sidebar:", noteObj);
     
     // Create wrapper div to hold both note button and delete button
     // Each pair of note and delete button bundle in one wapper
@@ -127,7 +127,7 @@ function addTextToDOM(noteText, container) {
     
     // Create the note button
     const btn = document.createElement('button');
-    btn.textContent = noteText;
+    btn.textContent = noteObj.title;
     btn.style.flex = '1';
     btn.style.padding = '1vw 1vh';
     btn.style.backgroundColor = '#333';
@@ -142,7 +142,7 @@ function addTextToDOM(noteText, container) {
     
     // Add click handler to copy note to clipboard
     btn.addEventListener('click', () => {
-        navigator.clipboard.writeText(noteText).then(() => {
+        navigator.clipboard.writeText(noteObj.title).then(() => {
             const originalText = btn.textContent;
             const originalBg = btn.style.backgroundColor;
             btn.textContent = 'Copied!';
@@ -180,15 +180,15 @@ function addTextToDOM(noteText, container) {
             Mouse position
             Whether modifier keys (Ctrl, Shift, etc.) were pressed, etc*/
         e.stopPropagation();
-        console.log("Delete button clicked for:", noteText);
+        console.log("Delete button clicked for:", noteObj);
         
         // Remove this specific note from Chrome storage
         chrome.storage.local.get(['notes'], (result) => {
             const notes = result.notes || [];
-            const updatedNotes = notes.filter(note => note !== noteText);
+            const updatedNotes = notes.filter(note => note.id !== noteObj.id);
             
             chrome.storage.local.set({ notes: updatedNotes }, () => {
-                console.log("Note deleted from storage:", noteText);
+                console.log("Note deleted from storage:", noteObj);
                 markWrapper.remove(); // Remove the entire wrapper (note + delete button)
             });
         });
