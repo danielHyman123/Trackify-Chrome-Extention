@@ -69,6 +69,11 @@ if (!document.getElementById('myExtensionSidebar')) {
     instructions.style.color = '#ccc';
     instructions.style.marginBottom = '15px';
 
+    //Search bar via bookmark titles
+    const searchBar = document.createElement('input');
+    searchBar.id = 'searchBar';
+    searchBar.placeholder = 'Search...';
+
     // Create notes container
     const notesContainer = document.createElement('div');
     notesContainer.id = 'notesContainer';
@@ -77,6 +82,7 @@ if (!document.getElementById('myExtensionSidebar')) {
     //Append everything to sidebar
     sidebar.appendChild(topWrapper);
     sidebar.appendChild(instructions);
+    sidebar.appendChild(searchBar);
     sidebar.appendChild(notesContainer);
 
     document.body.appendChild(sidebar);
@@ -113,7 +119,7 @@ function initNotesUI() {
     });
 }
 
-// Updated addTextToDOM function with delete functionality
+// add bookmark to sidebar and DOM with delete functionality
 function addTextToDOM(noteObj, container) {
     console.log("Adding note to sidebar:", noteObj);
     
@@ -128,7 +134,7 @@ function addTextToDOM(noteObj, container) {
     // Create the note button
     const btn = document.createElement('button');
     btn.textContent = noteObj.title;
-    btn.style.flex = '1';
+    btn.style.flex = '1';   //On same line as delete button, but takes up all the space on left
     btn.style.padding = '1vw 1vh';
     btn.style.backgroundColor = '#333';
     btn.style.color = 'white';
@@ -193,7 +199,10 @@ function addTextToDOM(noteObj, container) {
             });
         });
     });
-    
+
+    //Check if the existing bookmarks match the search term 
+    searchBar.addEventListener('input', handleSearch);
+
     // Add both buttons to wrapper
     markWrapper.appendChild(btn);
     markWrapper.appendChild(deleteBtn);
@@ -210,4 +219,24 @@ function openNotes(){
     } else {
         console.log("Notes window opened successfully.");
     }
+}
+
+//Function to handle search functionality
+function handleSearch() {
+    const searchTerm = searchBar.value.toLowerCase();
+
+    // Get all note buttons
+    const wrappers = document.querySelectorAll('#notesContainer > div');
+
+    // Loop through each note button and toggle visibility based on search term
+    wrappers.forEach(wrapper => {
+        const noteButton = wrapper.querySelector('button'); // Get the first button in the wrapper
+        const text = noteButton.textContent.toLowerCase();
+        
+        if (text.toLowerCase().includes(searchTerm)) {
+            wrapper.style.display = 'flex'; // Show the wrapper
+        } else {
+            wrapper.style.display = 'none'; // Hide the wrapper
+        }
+    });
 }
