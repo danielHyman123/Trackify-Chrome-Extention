@@ -1,29 +1,54 @@
+/*-This css file can later be updated to be used to style the sidebar and index.html files. 
+As of 05/27/2025, this file is not used in any file.
+Instead, the same styling functionalitites are used in injectSidebar.js through sidebar.style
+Additonally the html aspects of the sidebar are through sidebar.innerHTML
+For dependancies and minimizing the amount of code in each file, the css and html aspects of the js files should be dispersed*/
+
 body {
   margin: 0;
   font-family: Arial, sans-serif;
 }
 
-/* Sidebar styling */
-.sidebar {
-  height: 100vh;
-  width: 250px;
+
+
+
+
+
+
+
+
+/* .sidebar {
   position: fixed;
-  right: 0;
   top: 0;
-  background-color: #111;
+  right: 0;
+  width: 250;
+  height: 100vh;
+  background-color: #555;
   color: white;
-  overflow-y: auto;
+  padding: 10px;
   z-index: 9999;
-  padding-top: 20px;
-  display: none; /* Hidden by default */
+  margin-left: 0px;
+} */
+/*
+.sidebar button {
+  background-color: #4CAF50;
+  color: white;
+  border: none;
+  padding: 10px;
+  text-align: center;
+  text-decoration: none;
+  display: block;
+  margin: 10px auto;
+  cursor: pointer;
+  width: 80%;
+  font-size: 16px;
 }
 
-/* Button styling */
 #toggleButton {
   position: fixed;
   top: 20px;
   right: 270px;
-  padding: 10px 15px;
+  padding: 50px 15px;   
   font-size: 16px;
   background-color: #4CAF50;
   color: white;
@@ -32,10 +57,4 @@ body {
   cursor: pointer;
   z-index: 10000;
 }
-
-/* {
-  "matches": ["<all_urls>"],
-  "js": ["script/sidebar.js"],
-  "css": ["css/sidebar.css"]
-}
-] */
+ */

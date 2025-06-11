@@ -4,13 +4,14 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Notes</title>
-    <link rel= "stylesheet" href="css/notes.css">
+    <link rel="stylesheet" href="css/notes.css">
 </head>
 <body>
-    <div>
-        <textarea class="container" placeholder="Enter your notes here..."></textarea>
+    <div id="note_container">
+        <input id="title_input" type="text" placeholder="Enter your note title">
+        <textarea id="content" class="container" placeholder="Enter your notes here..."></textarea>
     </div>
-    <div class="buttons">
+    <div id="button_container">
         <button id="saveButton">Save</button>
         <button id="deleteButton">Delete</button>
     </div>
