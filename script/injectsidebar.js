@@ -145,6 +145,7 @@ function addTextToDOM(noteObj, container) {
     btn.style.textAlign = 'left';
     btn.style.overflow = 'hidden';
     btn.style.textOverflow = 'ellipsis';
+    btn.dataset.id = noteObj.id;
     
     // Add click handler to copy note to clipboard
     btn.addEventListener('click', () => {
