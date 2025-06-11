@@ -1,24 +1,34 @@
-/* Checks if the sidebar is already open
-   If it is, remove it. If not, create it. 
-
-   Creates new bookmark on sidebar when save button on notes.html is activated
-   Implements Delete button function for every bookmark*/  
-
-window.SIDEBARWIDTH = 20; 
-
-// Listen for messages from background script
-chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
-    //Checks if the message is to refresh the sidebar
-    if (message.action === 'refreshSidebar') {
-        console.log("Received refresh request for note:", message.noteText);
-        initNotesUI(); // Call the function to refresh the sidebar UI
-        sendResponse({success: true});  //Built-in chrome function which sends a response back to the sender(notes.js)
+function toggleOnSidebar() {
+    // Initialize the notes UI after sidebar is created
+    setTimeout(initNotesUI, 100); // Small delay to ensure DOM is ready
+    if (!document.getElementById('myExtensionSidebar')) {
+        createSidebar(); // Create the sidebar if it doesn't exist
+        createSidebarToggleBtn(); // Create the toggle button
+    } else {
+        const sidebar = document.getElementById('myExtensionSidebar');
+        const toggle = document.getElementById('toggleSidebar');
+        sidebar.style.display = 'block';
+        toggle.style.display = 'flex';
+        toggle.style.right = window.SIDEBARWIDTH + 'vw';
+        toggle.innerHTML = '>';
+        document.body.style.marginRight = window.SIDEBARWIDTH + 'vw';
+        // Add sidebar toggle margin
+        const newMargin = 10 + getMarginRightPixel() + 'px';
+        document.body.style.marginRight = newMargin;
     }
-});
+}
 
+function toggleOffSidebar() {
+    if (!document.getElementById('myExtensionSidebar')) return;
+    const sidebar = document.getElementById('myExtensionSidebar');
+    sidebar.style.display = 'none';
+    document.body.style.marginRight = '10px';
+    const toggle = document.getElementById('toggleSidebar');
+    toggle.style.right = '0';
+    toggle.innerHTML = '<';
+}
 
-if (!document.getElementById('myExtensionSidebar')) {
-    // Toggle it on
+function createSidebar() {
     const sidebar = document.createElement('div');
     sidebar.id = 'myExtensionSidebar';
     sidebar.style.position = 'fixed';
@@ -32,7 +42,6 @@ if (!document.getElementById('myExtensionSidebar')) {
     sidebar.style.zIndex = '9999';
     sidebar.style.boxSizing = 'border-box';
     sidebar.style.overflowY = 'auto';
-
     //Create top wrapper with title and plus button
     const topWrapper = document.createElement('div');
     topWrapper.style.display = 'flex';  //Insures elements inside this div will be side by side
@@ -74,32 +83,78 @@ if (!document.getElementById('myExtensionSidebar')) {
     notesContainer.id = 'notesContainer';
     notesContainer.style.marginTop = '10px';
 
-    //Append everything to sidebar
+    //Append everything to sidebarContent
     sidebar.appendChild(topWrapper);
     sidebar.appendChild(instructions);
     sidebar.appendChild(notesContainer);
 
     document.body.appendChild(sidebar);
     document.body.style.marginRight = window.SIDEBARWIDTH + 'vw';
-    
-    // Initialize the notes UI after sidebar is created
-    setTimeout(initNotesUI, 100); // Small delay to ensure DOM is ready
-    
+
     //+ button click handler to open notes.html
     plusButton.addEventListener('click', openNotes);
-
-} else {
-    // Toggle it off
-    document.getElementById('myExtensionSidebar').remove();
-    document.documentElement.style.marginRight = '';
-    document.body.style.marginRight = '';
 }
+
+function createSidebarToggleBtn() {
+    // Toggle Button styles
+    const sidebarToggleBtn = document.createElement('button');
+    sidebarToggleBtn.id = 'toggleSidebar';
+    sidebarToggleBtn.innerHTML = ">";
+    sidebarToggleBtn.style.position = 'absolute';
+    sidebarToggleBtn.style.right = window.SIDEBARWIDTH + 'vw';
+    sidebarToggleBtn.style.top = '0';
+    sidebarToggleBtn.style.width = '10px';
+    sidebarToggleBtn.style.height = '100vh';
+    sidebarToggleBtn.style.zIndex = '9999';
+    sidebarToggleBtn.style.cursor = 'pointer';
+    sidebarToggleBtn.style.display = 'flex';
+    sidebarToggleBtn.style.alignItems = 'center';
+    sidebarToggleBtn.style.justifyContent = 'center';
+    sidebarToggleBtn.style.fontSize = '18px';
+    sidebarToggleBtn.style.backgroundColor = '#333';
+    sidebarToggleBtn.style.color = 'white';
+    sidebarToggleBtn.style.border = 'none';
+    sidebarToggleBtn.style.outline = 'none';
+    document.body.appendChild(sidebarToggleBtn);
+    const newMargin = 10 + getMarginRightPixel() + 'px';
+    document.body.style.marginRight = newMargin;
+    // Toggle button click handler
+    sidebarToggleBtn.addEventListener('click', toggleSidebar);
+}
+
+function getMarginRightPixel() {
+    const marginRight = window.getComputedStyle(document.body).marginRight;
+    const actual = parseFloat(marginRight) || 0;
+    console.log('the margin is: ' + actual);
+    return actual;
+}
+
+/* Checks if the sidebar is already open
+   If it is, remove it. If not, create it. 
+
+   Creates new bookmark on sidebar when save button on notes.html is activated
+   Implements Delete button function for every bookmark*/
+
+window.SIDEBARWIDTH = 20;
+
+// Listen for messages from background script
+chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
+    //Checks if the message is to refresh the sidebar
+    if (message.action === 'refreshSidebar') {
+        console.log("Received refresh request for note:", message.noteText);
+        initNotesUI(); // Call the function to refresh the sidebar UI
+        sendResponse({ success: true });  //Built-in chrome function which sends a response back to the sender(notes.js)
+    }
+});
+
+// Toggle the sidebar
+toggleSidebar();
 
 // initNotesUI function to load existing notes into the sidebar
 function initNotesUI() {
     console.log("Initializing notes UI in sidebar");
     const container = document.getElementById('notesContainer');
-    
+
     if (!container) {
         console.warn("notesContainer not found");
         return;
@@ -116,7 +171,7 @@ function initNotesUI() {
 // Updated addTextToDOM function with delete functionality
 function addTextToDOM(noteObj, container) {
     console.log("Adding note to sidebar:", noteObj);
-    
+
     // Create wrapper div to hold both note button and delete button
     // Each pair of note and delete button bundle in one wapper
     const markWrapper = document.createElement('div');
@@ -124,7 +179,7 @@ function addTextToDOM(noteObj, container) {
     markWrapper.style.alignItems = 'center';
     markWrapper.style.margin = '5px 0';
     markWrapper.style.gap = '5px';
-    
+
     // Create the note button
     const btn = document.createElement('button');
     btn.textContent = noteObj.title;
@@ -140,7 +195,7 @@ function addTextToDOM(noteObj, container) {
     btn.style.overflow = 'hidden';
     btn.style.textOverflow = 'ellipsis';
     btn.dataset.id = noteObj.id;
-    
+
     // Add click handler to copy note to clipboard
     btn.addEventListener('click', () => {
         navigator.clipboard.writeText(noteObj.title).then(() => {
@@ -156,7 +211,7 @@ function addTextToDOM(noteObj, container) {
             console.error('Could not copy text: ', err);
         });
     });
-    
+
     // Create the delete button
     const deleteBtn = document.createElement('button');
     deleteBtn.textContent = 'X';
@@ -171,9 +226,9 @@ function addTextToDOM(noteObj, container) {
     deleteBtn.style.lineHeight = '1';
     deleteBtn.style.flexShrink = '0';
     deleteBtn.style.fontWeight = 'bold';
-    
+
     // Add click handler for delete button
-    deleteBtn.addEventListener('click', (e) => {        
+    deleteBtn.addEventListener('click', (e) => {
         /*e is short for event (I could also write (event) => {...} — it's the same thing)
         It contains details about the event that occurred:
             What type of event it was (click)
@@ -182,33 +237,42 @@ function addTextToDOM(noteObj, container) {
             Whether modifier keys (Ctrl, Shift, etc.) were pressed, etc*/
         e.stopPropagation();
         console.log("Delete button clicked for:", noteObj);
-        
+
         // Remove this specific note from Chrome storage
         chrome.storage.local.get(['notes'], (result) => {
             const notes = result.notes || [];
             const updatedNotes = notes.filter(note => note.id !== noteObj.id);
-            
+
             chrome.storage.local.set({ notes: updatedNotes }, () => {
                 console.log("Note deleted from storage:", noteObj);
                 markWrapper.remove(); // Remove the entire wrapper (note + delete button)
             });
         });
     });
-    
+
     // Add both buttons to wrapper
     markWrapper.appendChild(btn);
     markWrapper.appendChild(deleteBtn);
-    
+
     // Add markWrapper to container
     container.appendChild(markWrapper);
 }
 
 // Function called in event listener to the plus button to open notes.html
-function openNotes(){
+function openNotes() {
     const notesWindow = window.open(chrome.runtime.getURL("notes.html"), "NoteTaker", "width=600,height=400");
     if (!notesWindow) {
         console.error("Failed to open notes window. Please allow pop-ups for this site.");
     } else {
         console.log("Notes window opened successfully.");
+    }
+}
+
+function toggleSidebar() {
+    console.log("sidebar is toggled from function");
+    if (!document.getElementById('myExtensionSidebar') || document.getElementById('myExtensionSidebar').style.display === 'none') {
+        toggleOnSidebar();
+    } else {
+        toggleOffSidebar();
     }
 }
