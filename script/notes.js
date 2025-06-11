@@ -27,6 +27,14 @@ if (document.getElementById('content')) {
         // Save to chrome storage
         chrome.storage.local.get(['notes'], (result) => {
             const notes = result.notes || [];
+
+            //
+            chrome.runtime.sendMessage({
+                action: 'getURL'
+            }, (response) =>{
+                console.log("Current URL:", response.url);
+            })
+
             new_note = {
                 // use a number representing the exact current time as id
                 id : Date.now(),

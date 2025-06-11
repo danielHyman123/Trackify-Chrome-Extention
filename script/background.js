@@ -14,6 +14,9 @@ chrome.contextMenus.onClicked.addListener((info, tab) => {
     console.log("clicked")
     console.log(info)
 
+    // Save the ID of the tab where context menu was used
+    chrome.storage.local.set({ lastActiveTabId: tab.id });
+
     //Open notes.html as a popup when the notes button is clicked after right clicking
     chrome.windows.create({
         url: chrome.runtime.getURL('notes.html'),
@@ -42,5 +45,26 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
         });
         
         sendResponse({success: true});
+    }
+
+    if (message.action === 'getURL') {
+        // Tell Chrome we will respond asynchronously
+        let didRespond = false;
+
+        chrome.storage.local.get(['lastActiveTabId'], ({ lastActiveTabId }) => {
+            if (lastActiveTabId !== undefined) {
+                chrome.tabs.get(lastActiveTabId, (tab) => {
+                    if (chrome.runtime.lastError || !tab) {
+                        sendResponse({ url: "Error retrieving tab" });
+                    } else {
+                        sendResponse({ url: tab.url });
+                    }
+                });
+            } else {
+                sendResponse({ url: "No stored tab ID" });
+            }
+        });
+
+        return true; // Indicates that we will send a response asynchronously
     }
 });
