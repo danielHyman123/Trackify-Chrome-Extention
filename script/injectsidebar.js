@@ -4,6 +4,8 @@ function toggleOnSidebar() {
     if (!document.getElementById('myExtensionSidebar')) {
         createSidebar(); // Create the sidebar if it doesn't exist
         createSidebarToggleBtn(); // Create the toggle button
+        createNoteDisplay();
+        switchToDefaultMode(); // note mode is hidden by default
     } else {
         const sidebar = document.getElementById('myExtensionSidebar');
         const toggle = document.getElementById('toggleSidebar');
@@ -42,6 +44,7 @@ function createSidebar() {
     sidebar.style.zIndex = '9999';
     sidebar.style.boxSizing = 'border-box';
     sidebar.style.overflowY = 'auto';
+
     //Create top wrapper with title and plus button
     const topWrapper = document.createElement('div');
     topWrapper.style.display = 'flex';  //Insures elements inside this div will be side by side
@@ -83,10 +86,17 @@ function createSidebar() {
     notesContainer.id = 'notesContainer';
     notesContainer.style.marginTop = '10px';
 
-    //Append everything to sidebarContent
-    sidebar.appendChild(topWrapper);
-    sidebar.appendChild(instructions);
-    sidebar.appendChild(notesContainer);
+    // Create a second container
+    const contentContainer = document.createElement('div');
+    contentContainer.id = 'contentContainer';
+
+    //Append everything to container
+    contentContainer.appendChild(topWrapper);
+    contentContainer.appendChild(instructions);
+    contentContainer.appendChild(notesContainer);
+
+    // Apend container to sidebar
+    sidebar.appendChild(contentContainer);
 
     document.body.appendChild(sidebar);
     document.body.style.marginRight = window.SIDEBARWIDTH + 'vw';
@@ -122,12 +132,183 @@ function createSidebarToggleBtn() {
     sidebarToggleBtn.addEventListener('click', toggleSidebar);
 }
 
+function createNoteDisplay() {
+    const sidebar = document.getElementById('myExtensionSidebar');
+
+    // Create overall container
+    const noteContainer = document.createElement('div');
+    noteContainer.id = 'noteContainer';
+    noteContainer.style.display = 'flex';
+    noteContainer.style.flexDirection = 'column';
+    noteContainer.style.alignItems = 'center';
+    noteContainer.style.justifyContent = 'space-between';
+    noteContainer.style.height = '100%';
+
+    //  The title
+    const noteTitle = document.createElement('h2');
+    noteTitle.id = 'noteTitle';
+    noteTitle.style.fontSize = '16px';
+    noteTitle.contentEditable = true;
+    noteTitle.style.padding = '4px';
+    noteTitle.style.width = '50%';
+    noteTitle.style.textAlign = 'center';
+    noteTitle.style.translate = '-30%';
+
+    // Back button
+    const backButton = document.createElement('button');
+    backButton.id = 'backButton';
+    backButton.style.fontSize = '12px';
+    backButton.style.width = '20px';
+    backButton.style.height = '20px';
+    backButton.style.backgroundColor = '#FFFFFF';
+    backButton.style.color = 'white';
+    backButton.style.border = 'none';
+    backButton.style.padding = '4px 8px';
+    backButton.style.borderRadius = '4px';
+    backButton.style.cursor = 'pointer';
+    backButton.style.backgroundImage = `url(${chrome.runtime.getURL('/back.jpg')})`;
+    backButton.style.backgroundRepeat = 'no-repeat';
+    backButton.style.backgroundPosition = 'center';
+    backButton.style.backgroundSize = 'contain';
+    backButton.style.backgroundColor = 'transparent';
+
+    // Top Container
+    const topContainer = document.createElement('div');
+    topContainer.style.display = 'flex';
+    topContainer.style.justifyContent = 'flex-start';
+    topContainer.style.alignItems = 'start';
+    topContainer.style.width = '100%';
+    topContainer.style.height = '15%';
+    topContainer.style.gap = '35%';
+    topContainer.style.paddingTop = '5px';
+
+    // The content
+    const noteContent = document.createElement('p');
+    noteContent.id = 'noteContent';
+    noteContent.style.fontSize = '12px';
+    noteContent.contentEditable = true;
+    noteContent.style.width = '100%';
+    noteContent.style.height = '95%';
+    noteContent.style.marginTop = '-50px';
+    noteContent.style.border = 'white';
+    noteContent.style.borderWidth = '1.5px';
+    noteContent.style.borderStyle = 'solid';
+    noteContent.style.borderRadius = '5px';
+    noteContent.style.padding = '6px'; 
+
+    // Save button
+    const saveButton = document.createElement('button');
+    saveButton.id = 'noteSaveButton';
+    saveButton.width = '100%';
+    saveButton.height = '20px';
+    saveButton.style.fontSize = '16px';
+    saveButton.style.textAlign = 'center';
+    saveButton.style.backgroundColor = '#084298';
+    saveButton.style.color = 'white';
+    saveButton.style.border = 'none';
+    saveButton.style.borderRadius = '4px';
+    saveButton.style.cursor = 'pointer';
+    saveButton.textContent = 'Save Note';
+
+    // append top content
+    topContainer.appendChild(backButton);
+    topContainer.appendChild(noteTitle);
+    noteContainer.appendChild(topContainer);
+    noteContainer.appendChild(noteContent);
+    noteContainer.appendChild(saveButton);
+
+    // action listener for back button	
+    backButton.addEventListener('click', switchToDefaultMode);
+    saveButton.addEventListener('click', async () => {
+        const titleContent = noteTitle.textContent;
+        const contentContent = noteContent.textContent;
+        const noteId = noteContainer.dataset.id;
+        await saveNote(noteId, titleContent, contentContent);
+        // Also have to send message to background.js to update the sidebar
+    });
+
+    sidebar.appendChild(noteContainer);
+}
+
 function getMarginRightPixel() {
     const marginRight = window.getComputedStyle(document.body).marginRight;
     const actual = parseFloat(marginRight) || 0;
     console.log('the margin is: ' + actual);
     return actual;
 }
+
+async function switchToNoteMode(noteId) {
+    console.log("switchToNoteMode called with id:", noteId);
+    const sidebar = document.getElementById('contentContainer');
+    const noteContainer = document.getElementById('noteContainer');
+    const noteTitle = document.getElementById('noteTitle');
+    const noteContent = document.getElementById('noteContent');
+
+    sidebar.style.display = 'none';
+    noteContainer.style.display = 'flex';
+    noteContainer.dataset.id = noteId;
+
+    const note = await getNote(noteId);
+    console.log('the gotten note is: ', note);
+
+    if (note) {
+        noteTitle.textContent = note.title;
+        noteContent.textContent = note.content;
+    } else {
+        noteTitle.textContent = 'Note not found';
+        noteContent.textContent = '';
+    }
+}
+
+
+function switchToDefaultMode() {
+    const noteContainer = document.getElementById('noteContainer');
+    const contentContainer = document.getElementById('contentContainer');
+    noteContainer.style.display = 'none';
+    contentContainer.style.display = '';
+}
+
+function getNote(noteId) {
+    console.log("getNote called with id:", noteId);
+
+    return new Promise((resolve) => {
+        chrome.storage.local.get(['notes'], (result) => {
+            console.log("chrome.storage.local.get returned:", result);
+            const notes = result.notes || [];
+
+            const foundNote = notes.find(theNote => {
+                console.log("Checking note:", theNote);
+                return String(theNote.id) === String(noteId);
+            });
+
+            console.log("Resolved note:", foundNote);
+            resolve(foundNote);
+        });
+    });
+}
+
+function saveNote(noteId, title, content) {
+    
+    return new Promise((resolve) => {
+        chrome.storage.local.get(['notes'], (result) => {
+            const notes = result.notes || [];
+            const noteIndex = notes.findIndex(note => String(note.id) === String(noteId));
+            if (noteIndex !== -1) {
+                notes[noteIndex].title = title;
+                notes[noteIndex].content = content;
+            } else {
+                notes.push({ id: noteId, title: title, content: content });
+            }
+            chrome.storage.local.set({ notes: notes }, () => {
+                console.log("Note saved:", noteId);
+                showToast("Note Succesfully Saved!");
+                resolve();
+            });
+        })
+    })
+}
+
+
 
 /* Checks if the sidebar is already open
    If it is, remove it. If not, create it. 
@@ -136,6 +317,8 @@ function getMarginRightPixel() {
    Implements Delete button function for every bookmark*/
 
 window.SIDEBARWIDTH = 20;
+// The modes options are : default, note
+window.SIDEBAR_MODE = 'default';
 
 // Listen for messages from background script
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
@@ -197,19 +380,9 @@ function addTextToDOM(noteObj, container) {
     btn.dataset.id = noteObj.id;
 
     // Add click handler to copy note to clipboard
-    btn.addEventListener('click', () => {
-        navigator.clipboard.writeText(noteObj.title).then(() => {
-            const originalText = btn.textContent;
-            const originalBg = btn.style.backgroundColor;
-            btn.textContent = 'Copied!';
-            btn.style.backgroundColor = '#4CAF50';
-            setTimeout(() => {
-                btn.textContent = originalText;
-                btn.style.backgroundColor = originalBg;
-            }, 1000);
-        }).catch(err => {
-            console.error('Could not copy text: ', err);
-        });
+    btn.addEventListener('click', (e) => {
+        console.log("the note was called with the id: " + btn.dataset.id);
+        switchToNoteMode(btn.dataset.id);
     });
 
     // Create the delete button
@@ -226,6 +399,9 @@ function addTextToDOM(noteObj, container) {
     deleteBtn.style.lineHeight = '1';
     deleteBtn.style.flexShrink = '0';
     deleteBtn.style.fontWeight = 'bold';
+    deleteBtn.style.display = 'flex';
+    deleteBtn.style.justifyContent = 'center';
+    deleteBtn.style.alignItems = 'center';
 
     // Add click handler for delete button
     deleteBtn.addEventListener('click', (e) => {
@@ -275,4 +451,29 @@ function toggleSidebar() {
     } else {
         toggleOffSidebar();
     }
+}
+
+function showToast(message) {
+    console.log("toast was called with message: " + message);
+    const toast = document.createElement('div');
+    toast.textContent = message;
+    toast.style.position = 'fixed';
+    toast.style.top = '20px';
+    toast.style.right = '20px';
+    toast.style.padding = '10px 20px';
+    toast.style.backgroundColor = '#4CAF50';
+    toast.style.color = 'white';
+    toast.style.borderRadius = '5px';
+    toast.style.boxShadow = '0 0 10px rgba(23, 208, 63, 0.3)';
+    toast.style.zIndex = '99999';
+    toast.style.fontSize = '14px';
+    toast.style.opacity = '1';
+    toast.style.transition = 'opacity 0.5s ease';
+
+    document.body.appendChild(toast);
+
+    setTimeout(() => {
+        toast.style.opacity = '0';
+        setTimeout(() => toast.remove(), 500); // Remove after fade out
+    }, 1500); // Show for 1.5 seconds
 }
