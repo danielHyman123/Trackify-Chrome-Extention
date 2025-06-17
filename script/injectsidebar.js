@@ -14,8 +14,15 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
         initNotesUI(); // Call the function to refresh the sidebar UI
         sendResponse({success: true});  //Built-in chrome function which sends a response back to the sender(notes.js)
     }
-});
 
+    //Checks if the message is to get highlighted text
+    if (message.action === 'highlightedText'){
+        // window.getSelection().removeAllRanges(); // Clear any existing selections
+        const selection = window.getSelection().toString();
+        sendResponse({highlighted: selection}); // Send the highlighted text back to the sender
+        return true;
+    }
+});
 
 if (!document.getElementById('myExtensionSidebar')) {
     // Toggle it on
@@ -211,4 +218,10 @@ function openNotes(){
     } else {
         console.log("Notes window opened successfully.");
     }
+}
+
+//Function to save highlighted text
+function getHighlightedText(){
+    const highlightedText = window.getSelection().toString();
+    console.log("Highlighted text:", highlightedText);
 }

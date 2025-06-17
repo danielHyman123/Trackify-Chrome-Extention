@@ -7,7 +7,7 @@ if (document.getElementById('content')) {
     const contentArea = document.getElementById('content');
     const titleArea = document.getElementById('title_input');
     const saveButton = document.getElementById('saveButton');
-    // const deleteButton = document.getElementById('deleteButton');
+    const highlightedTextElement = document.getElementById('highlightedText');
 
     // Load existing note content when page loads
     chrome.storage.local.get(['currentNote'], (result) => {
@@ -16,6 +16,28 @@ if (document.getElementById('content')) {
             titleArea.value = result.currentNote.title;
         }
     });
+
+    //Load highlighted text when page loads
+    chrome.storage.local.get(['highlighted'], (result) =>{
+        const highlighted = result.highlighted || '';
+        
+        //note.html is opened though highlighting text and right clicking
+        if (highlighted){
+            //Display highlighted text
+            if (highlightedTextElement){
+                highlightedTextElement.textContent = "Highlighted Text: " + highlighted;
+            }
+
+            //Clear highlighted text from storage after use
+            chrome.storage.local.remove('highlighted');
+        }
+        //note.html is opened though sidebar or index.html
+        else{
+            if (highlightedTextElement){
+                highlightedTextElement.textContent = ''
+            }
+        }
+    })
 
     // Save button handler for popup
     saveButton.addEventListener('click', () => {
@@ -43,6 +65,10 @@ if (document.getElementById('content')) {
                 contentArea.value = ''; // Clear textarea
                 titleArea.value = ''; // Clear titleArea
 
+                if (highlightedTextElement){
+                    highlightedTextElement.textContent = '';
+                }
+
                 // Send message to background script to update sidebar
                 chrome.runtime.sendMessage({
                     action: 'updateSidebar',
@@ -52,8 +78,17 @@ if (document.getElementById('content')) {
         }); 
     });
 
-    // Auto-save current text as user types (optional)
+    // Auto-save current text as user types
     contentArea.addEventListener('input', () => {
         chrome.storage.local.set({ currentNote: { title: titleArea.value, content: contentArea.value } });
+    });
+
+    titleArea.addEventListener('input', () => {
+        chrome.storage.local.set({ 
+            currentNote: { 
+                title: titleArea.value, 
+                content: contentArea.value 
+            } 
+        });
     });
 }

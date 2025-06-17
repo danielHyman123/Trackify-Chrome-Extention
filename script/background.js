@@ -14,12 +14,17 @@ chrome.contextMenus.onClicked.addListener((info, tab) => {
     console.log("clicked")
     console.log(info)
 
-    //Open notes.html as a popup when the notes button is clicked after right clicking
-    chrome.windows.create({
-        url: chrome.runtime.getURL('notes.html'),
-        type: "popup", 
-        width:600,
-        height:600
+    //Send message to content script in current tab.
+    const highlighted = info.selectionText || '';
+        
+        //Open notes.html as a popup when the notes button is clicked after right clicking
+    chrome.storage.local.set({highlighted}, () => {
+        chrome.windows.create({
+            url: chrome.runtime.getURL('notes.html'),
+            type: "popup", 
+            width:600,
+            height:600
+        });
     });
 });
 
