@@ -1,3 +1,4 @@
+
 /* Chrome storage API is used to store data in the browser.
    By: Daniel */
 
@@ -24,32 +25,43 @@ if (document.getElementById('content')) {
         const titleText = titleArea.value.trim();
         if (noteText === '' || titleText === '') return;
 
-        // Save to chrome storage
-        chrome.storage.local.get(['notes'], (result) => {
-            const notes = result.notes || [];
-            new_note = {
-                // use a number representing the exact current time as id
-                id : Date.now(),
-                title: titleText, 
-                content: noteText
-            }
-            notes.push(new_note);
+        // Get the current URL before saving
+        chrome.runtime.sendMessage({
+            action: 'getURL'
+        }, (response) => {
+            console.log("Current URL:", response.url);
             
-            chrome.storage.local.set({ 
-                notes: notes,
-                currentNote: '' // Clear current note after saving
-            }, () => {
-                console.log("Note saved:", noteText);
-                contentArea.value = ''; // Clear textarea
-                titleArea.value = ''; // Clear titleArea
+            // Save to chrome storage with URL included
+            chrome.storage.local.get(['notes'], (result) => {
+                const notes = result.notes || [];
 
-                // Send message to background script to update sidebar
-                chrome.runtime.sendMessage({
-                    action: 'updateSidebar',
-                    noteText: noteText
+                const new_note = {
+                    // use a number representing the exact current time as id
+                    id: Date.now(),
+                    title: titleText,
+                    content: noteText,
+                    url: response.url || "Unknown URL", // Add URL to the note
+                    timestamp: new Date().toISOString() // Unnessasary timestamp
+                };
+                
+                notes.push(new_note);
+
+                chrome.storage.local.set({
+                    notes: notes,
+                    currentNote: '' // Clear current note after saving
+                }, () => {
+                    console.log("Note saved with URL:", new_note);
+                    contentArea.value = ''; // Clear textarea
+                    titleArea.value = ''; // Clear titleArea
+
+                    // Send message to background script to update sidebar
+                    chrome.runtime.sendMessage({
+                        action: 'updateSidebar',
+                        noteText: noteText
+                    });
                 });
             });
-        }); 
+        });
     });
 
     // Auto-save current text as user types (optional)

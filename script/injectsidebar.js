@@ -81,6 +81,11 @@ function createSidebar() {
     instructions.style.color = '#ccc';
     instructions.style.marginBottom = '15px';
 
+    //Search bar via bookmark titles
+    const searchBar = document.createElement('input');
+    searchBar.id = 'searchBar';
+    searchBar.placeholder = 'Search...';
+
     // Create notes container
     const notesContainer = document.createElement('div');
     notesContainer.id = 'notesContainer';
@@ -93,6 +98,7 @@ function createSidebar() {
     //Append everything to container
     contentContainer.appendChild(topWrapper);
     contentContainer.appendChild(instructions);
+    contentContainer.appendChild(searchBar);
     contentContainer.appendChild(notesContainer);
 
     // Apend container to sidebar
@@ -389,10 +395,66 @@ function addTextToDOM(noteObj, container) {
     btn.style.textOverflow = 'ellipsis';
     btn.dataset.id = noteObj.id;
 
+    // Add URL as a tooltip if it exists
+    if (noteObj.url) {
+        btn.title = `URL: ${noteObj.url}`;
+    }
+
     // Add click handler to copy note to clipboard
     btn.addEventListener('click', (e) => {
         console.log("the note was called with the id: " + btn.dataset.id);
         switchToNoteMode(btn.dataset.id);
+    });
+
+    // Add right-click handler to copy URL or go to URL
+    btn.addEventListener('contextmenu', (e) => {
+        e.preventDefault();
+        if (noteObj.url && noteObj.url !== "Unknown URL") {
+            // Create a simple context menu
+            const contextMenu = document.createElement('div');
+            contextMenu.style.position = 'fixed';
+            contextMenu.style.left = e.clientX + 'px';
+            contextMenu.style.top = e.clientY + 'px';
+            contextMenu.style.backgroundColor = '#444';
+            contextMenu.style.border = '1px solid #666';
+            contextMenu.style.borderRadius = '4px';
+            contextMenu.style.padding = '5px';
+            contextMenu.style.zIndex = '10000';
+            contextMenu.style.fontSize = '12px';
+
+            const copyUrlOption = document.createElement('div');
+            copyUrlOption.textContent = 'Copy URL';
+            copyUrlOption.style.padding = '5px 10px';
+            copyUrlOption.style.cursor = 'pointer';
+            copyUrlOption.style.color = 'white';
+            copyUrlOption.addEventListener('click', () => {
+                navigator.clipboard.writeText(noteObj.url);
+                contextMenu.remove();
+            });
+
+            const goToUrlOption = document.createElement('div');
+            goToUrlOption.textContent = 'Go to URL';
+            goToUrlOption.style.padding = '5px 10px';
+            goToUrlOption.style.cursor = 'pointer';
+            goToUrlOption.style.color = 'white';
+            goToUrlOption.addEventListener('click', () => {
+                window.open(noteObj.url, '_blank');
+                contextMenu.remove();
+            });
+
+            contextMenu.appendChild(copyUrlOption);
+            contextMenu.appendChild(goToUrlOption);
+            document.body.appendChild(contextMenu);
+
+            // Remove context menu when clicking elsewhere
+            setTimeout(() => {
+                document.addEventListener('click', () => {
+                    if (contextMenu.parentNode) {
+                        contextMenu.remove();
+                    }
+                }, { once: true });
+            }, 100);
+        }
     });
 
     // Create the delete button
@@ -436,6 +498,12 @@ function addTextToDOM(noteObj, container) {
         });
     });
 
+    //Check if the existing bookmarks match the search term 
+    const searchBar = document.getElementById('searchBar');
+    if (searchBar) {
+        searchBar.addEventListener('input', handleSearch);
+    }
+
     // Add both buttons to wrapper
     markWrapper.appendChild(btn);
     markWrapper.appendChild(deleteBtn);
@@ -446,12 +514,19 @@ function addTextToDOM(noteObj, container) {
 
 // Function called in event listener to the plus button to open notes.html
 function openNotes() {
-    const notesWindow = window.open(chrome.runtime.getURL("notes.html"), "NoteTaker", "width=600,height=400");
-    if (!notesWindow) {
-        console.error("Failed to open notes window. Please allow pop-ups for this site.");
-    } else {
-        console.log("Notes window opened successfully.");
-    }
+    // First, save the current tab info to storage
+    chrome.runtime.sendMessage({
+        action: 'saveCurrentTab'
+    }, (response) => {
+        console.log("Current tab saved:", response);
+        
+        const notesWindow = window.open(chrome.runtime.getURL("notes.html"), "NoteTaker", "width=600,height=400");
+        if (!notesWindow) {
+            console.error("Failed to open notes window. Please allow pop-ups for this site.");
+        } else {
+            console.log("Notes window opened successfully.");
+        }
+    });
 }
 
 function toggleSidebar() {
@@ -486,4 +561,25 @@ function showToast(message) {
         toast.style.opacity = '0';
         setTimeout(() => toast.remove(), 500); // Remove after fade out
     }, 1500); // Show for 1.5 seconds
+}
+
+//Function to handle search functionality
+function handleSearch() {
+    const searchBar = document.getElementById('searchBar');
+    const searchTerm = searchBar.value.toLowerCase();
+
+    // Get all note buttons
+    const wrappers = document.querySelectorAll('#notesContainer > div');
+
+    // Loop through each note button and toggle visibility based on search term
+    wrappers.forEach(wrapper => {
+        const noteButton = wrapper.querySelector('button'); // Get the first button in the wrapper
+        const text = noteButton.textContent.toLowerCase();
+        
+        if (text.toLowerCase().includes(searchTerm)) {
+            wrapper.style.display = 'flex'; // Show the wrapper
+        } else {
+            wrapper.style.display = 'none'; // Hide the wrapper
+        }
+    });
 }
