@@ -132,6 +132,16 @@ function createSidebarToggleBtn() {
     sidebarToggleBtn.addEventListener('click', toggleSidebar);
 }
 
+/*************  ✨ Windsurf Command ⭐  *************/
+/**
+ * Creates the note display when a note is clicked from the sidebar.
+ *
+ * Creates a container that holds the title of the note, the content of the note, and a back button.
+ * The container is appended to the sidebar.
+ * The back button is given an action listener to switch to the default mode.
+ * The save button is given an action listener to save the note and send a message to the background script to update the sidebar.
+ */
+/*******  03a10b0e-9f0a-4f85-86cd-975c5190d53e  *******/
 function createNoteDisplay() {
     const sidebar = document.getElementById('myExtensionSidebar');
 
