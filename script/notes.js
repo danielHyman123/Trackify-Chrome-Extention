@@ -8,15 +8,19 @@ if (document.getElementById('content')) {
     const contentArea = document.getElementById('content');
     const titleArea = document.getElementById('title_input');
     const saveButton = document.getElementById('saveButton');
+    const categoryButton = document.getElementById('categoryButton');
     // const deleteButton = document.getElementById('deleteButton');
 
+    loadCategories();
+
+//Unnecessary code
     // Load existing note content when page loads
-    chrome.storage.local.get(['currentNote'], (result) => {
-        if (result.currentNote) {
-            contentArea.value = result.currentNote.content;
-            titleArea.value = result.currentNote.title;
-        }
-    });
+    // chrome.storage.local.get(['currentNote'], (result) => {
+    //     if (result.currentNote) {
+    //         contentArea.value = result.currentNote.content;
+    //         titleArea.value = result.currentNote.title;
+    //     }
+    // });
 
     // Save button handler for popup
     saveButton.addEventListener('click', () => {
@@ -64,8 +68,128 @@ if (document.getElementById('content')) {
         });
     });
 
+    // Category button event listener
+    categoryButton.addEventListener('click', createCategory);
+
+
     // Auto-save current text as user types (optional)
     contentArea.addEventListener('input', () => {
         chrome.storage.local.set({ currentNote: { title: titleArea.value, content: contentArea.value } });
+    });
+}
+
+// Creates a new Category button in categoryContainer in notes.html
+function createCategory() {
+    // Prompt user for category name
+    const categoryName = prompt('Enter category name:');
+    
+    // Check if user cancelled or entered empty name
+    if (!categoryName || categoryName.trim() === '') {
+        return;
+    }
+
+    const trimmedName = categoryName.trim();
+
+    // Get existing categories from storage
+    chrome.storage.local.get(['categories'], (result) => {
+        const categories = result.categories || [];
+        
+        // Check if category already exists
+        const categoryExists = categories.some(cat => cat.name.toLowerCase() === trimmedName.toLowerCase());
+        if (categoryExists) {
+            alert('Category already exists!');
+            return;
+        }
+
+        // Create new category object
+        const newCategory = {
+            id: Date.now(),
+            name: trimmedName
+        };
+
+        // Add to categories array
+        categories.push(newCategory);
+
+        // Save to storage
+        chrome.storage.local.set({ categories: categories }, () => {
+            console.log('Category saved:', newCategory);
+            // Create and display the new category button
+            createCategoryButton(newCategory);
+        });
+    });
+}
+
+// Function to create a category button element
+function createCategoryButton(category) {
+    const categoryContainer = document.getElementById('category_buttons');
+
+    const newCategoryButton = document.createElement('button');
+    newCategoryButton.textContent = category.name;
+    newCategoryButton.className = 'category-btn';
+    newCategoryButton.dataset.categoryId = category.id;
+    
+    // Add click event listener for category selection
+    newCategoryButton.addEventListener('click', () => {
+        selectCategory(category);
+    });
+
+    // Add right-click context menu for deletion (optional)
+    newCategoryButton.addEventListener('contextmenu', (e) => {
+        e.preventDefault();
+        if (confirm(`Delete category "${category.name}"?`)) {
+            deleteCategory(category.id);
+        }
+    });
+
+    categoryContainer.appendChild(newCategoryButton);
+}
+
+// Function to handle category selection
+function selectCategory(category) {
+    console.log('Selected category:', category.name);
+    
+    const categoryContainer = document.getElementById('category_buttons');
+
+    // Remove active class from all category buttons
+    const allCategoryButtons = categoryContainer.querySelectorAll('.category-btn');
+    allCategoryButtons.forEach(btn => btn.classList.remove('active'));
+    
+    // Add active class to selected button
+    const selectedButton = categoryContainer.querySelector(`[data-category-id="${category.id}"]`);
+    if (selectedButton) {
+        selectedButton.classList.add('active');
+    }
+
+    // You can extend this function to filter notes by category
+    // For now, it just shows which category is selected
+    alert(`Selected category: ${category.name}`);
+}
+
+// Function to delete a category
+function deleteCategory(categoryId) {
+    chrome.storage.local.get(['categories'], (result) => {
+        const categories = result.categories || [];
+        const updatedCategories = categories.filter(cat => cat.id !== categoryId);
+        
+        chrome.storage.local.set({ categories: updatedCategories }, () => {
+            console.log('Category deleted:', categoryId);
+            // Remove the button from the DOM
+            const buttonToRemove = categoryContainer.querySelector(`[data-category-id="${categoryId}"]`);
+            if (buttonToRemove) {
+                buttonToRemove.remove();
+            }
+        });
+    });
+}
+
+// Function to load and display existing categories
+function loadCategories() {
+    chrome.storage.local.get(['categories'], (result) => {
+        const categories = result.categories || [];
+                
+        // Create buttons for each category
+        categories.forEach(category => {
+            createCategoryButton(category);
+        });
     });
 }
