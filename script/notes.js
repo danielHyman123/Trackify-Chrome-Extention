@@ -2,6 +2,9 @@
 /* Chrome storage API is used to store data in the browser.
    By: Daniel */
 
+   //Track curent Category
+   let currentCategory = '';
+
 // Check if we're in the popup/extension page context
 if (document.getElementById('content')) {
     // This is the popup page - handle save button
@@ -13,7 +16,7 @@ if (document.getElementById('content')) {
 
     loadCategories();
 
-//Unnecessary code
+//Unnecessary code?
     // Load existing note content when page loads
     // chrome.storage.local.get(['currentNote'], (result) => {
     //     if (result.currentNote) {
@@ -21,6 +24,9 @@ if (document.getElementById('content')) {
     //         titleArea.value = result.currentNote.title;
     //     }
     // });
+
+    // Category button event listener
+    categoryButton.addEventListener('click', createCategory);
 
     // Save button handler for popup
     saveButton.addEventListener('click', () => {
@@ -45,8 +51,9 @@ if (document.getElementById('content')) {
                     title: titleText,
                     content: noteText,
                     url: response.url || "Unknown URL", // Add URL to the note
-                    timestamp: new Date().toISOString() // Unnessasary timestamp
-                };
+                    timestamp: new Date().toISOString(), // Unnessasary timestamp
+                    category: currentCategory ? currentCategory.name: ''                 
+                 };
                 
                 notes.push(new_note);
 
@@ -67,10 +74,6 @@ if (document.getElementById('content')) {
             });
         });
     });
-
-    // Category button event listener
-    categoryButton.addEventListener('click', createCategory);
-
 
     // Auto-save current text as user types (optional)
     contentArea.addEventListener('input', () => {
@@ -148,6 +151,8 @@ function createCategoryButton(category) {
 function selectCategory(category) {
     console.log('Selected category:', category.name);
     
+    currentCategory = category; // Update currentCategory variable
+
     const categoryContainer = document.getElementById('category_buttons');
 
     // Remove active class from all category buttons
@@ -160,12 +165,12 @@ function selectCategory(category) {
         selectedButton.classList.add('active');
     }
 
-    // You can extend this function to filter notes by category
-    // For now, it just shows which category is selected
+    // I can extend this function to filter notes by category
+    // I now, it just shows which category is selected
     alert(`Selected category: ${category.name}`);
 }
 
-// Function to delete a category
+// Function to delete a category - not functional yet(errors)
 function deleteCategory(categoryId) {
     chrome.storage.local.get(['categories'], (result) => {
         const categories = result.categories || [];
@@ -173,10 +178,17 @@ function deleteCategory(categoryId) {
         
         chrome.storage.local.set({ categories: updatedCategories }, () => {
             console.log('Category deleted:', categoryId);
+            
+            // If Selected Category is deleted, reset currentCategory
+            if (currentCategory && currentCategory.id === categoryId) {
+                currentCategory = '';
+            }
+            
             // Remove the button from the DOM
             const buttonToRemove = categoryContainer.querySelector(`[data-category-id="${categoryId}"]`);
             if (buttonToRemove) {
                 buttonToRemove.remove();
+                alert('Selected category has been deleted.');
             }
         });
     });
