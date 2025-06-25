@@ -158,11 +158,14 @@ function selectCategory(category) {
     // Remove active class from all category buttons
     const allCategoryButtons = categoryContainer.querySelectorAll('.category-btn');
     allCategoryButtons.forEach(btn => btn.classList.remove('active'));
+    allCategoryButtons.forEach(btn => btn.style.backgroundColor = ''); // Reset background color (can't be same line as above)
+
     
     // Add active class to selected button
     const selectedButton = categoryContainer.querySelector(`[data-category-id="${category.id}"]`);
     if (selectedButton) {
         selectedButton.classList.add('active');
+        selectedButton.style.backgroundColor = 'cyan'; // Change color to indicate selection
     }
 
     // I can extend this function to filter notes by category
