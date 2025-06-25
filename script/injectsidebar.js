@@ -574,12 +574,33 @@ function handleSearch() {
     // Loop through each note button and toggle visibility based on search term
     wrappers.forEach(wrapper => {
         const noteButton = wrapper.querySelector('button'); // Get the first button in the wrapper
-        const text = noteButton.textContent.toLowerCase();
+        const noteId = noteButton.dataset.id;
+        // const text = noteButton.textContent.toLowerCase();
         
-        if (text.toLowerCase().includes(searchTerm)) {
-            wrapper.style.display = 'flex'; // Show the wrapper
-        } else {
-            wrapper.style.display = 'none'; // Hide the wrapper
-        }
+        // Find the note object to get its URL
+        chrome.storage.local.get(['notes'], (result) => {
+            const notes = result.notes || [];
+            const noteObj = notes.find(note => note.id.toString() === noteId);
+            
+            if (noteObj) {
+                const titleText = noteObj.title.toLowerCase();
+                const urlText = noteObj.url ? noteObj.url.toLowerCase() : '';
+                const contentText = noteObj.content ? noteObj.content.toLowerCase() : '';
+                const catagoryText = noteObj.category ? noteObj.category.toLowerCase() : '';
+                
+                // Check if search term matches title, URL, or content
+                const matchesTitle = titleText.includes(searchTerm);
+                const matchesUrl = urlText.includes(searchTerm);
+                const matchesContent = contentText.includes(searchTerm);
+                const matchesCategory = catagoryText.includes(searchTerm);
+                
+                // Show wrapper if any field matches
+                if (matchesTitle || matchesUrl || matchesContent || matchesCategory) {
+                    wrapper.style.display = 'flex';
+                } else {
+                    wrapper.style.display = 'none';
+                }
+            }
+        });
     });
 }
