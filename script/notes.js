@@ -2,10 +2,10 @@
 /* Chrome storage API is used to store data in the browser.
    By: Daniel */
 
-   //Track curent Category
-   let currentCategory = '';
+//Track curent Category
+let currentCategory = '';
 
-// Check if we're in the popup/extension page context
+// Check if we're in the popup/extension page context, then run all notes.html functionality (main function)
 if (document.getElementById('content')) {
     // This is the popup page - handle save button
     const contentArea = document.getElementById('content');
@@ -51,7 +51,7 @@ if (document.getElementById('content')) {
                     title: titleText,
                     content: noteText,
                     url: response.url || "Unknown URL", // Add URL to the note
-                    timestamp: new Date().toISOString(), // Unnessasary timestamp
+                    timestamp: new Date().toISOString(), // Timestamp for users to see when the note was created
                     category: currentCategory ? currentCategory.name: ''                 
                  };
                 
@@ -136,7 +136,7 @@ function createCategoryButton(category) {
         selectCategory(category);
     });
 
-    // Add right-click context menu for deletion (optional)
+    // Add right-click context menu for deletion 
     newCategoryButton.addEventListener('contextmenu', (e) => {
         e.preventDefault();
         if (confirm(`Delete category "${category.name}"?`)) {
@@ -168,12 +168,10 @@ function selectCategory(category) {
         selectedButton.style.backgroundColor = 'cyan'; // Change color to indicate selection
     }
 
-    // I can extend this function to filter notes by category
-    // I now, it just shows which category is selected
     alert(`Selected category: ${category.name}`);
 }
 
-// Function to delete a category - not functional yet(errors)
+// Function to delete a category
 function deleteCategory(categoryId) {
     chrome.storage.local.get(['categories'], (result) => {
         const categories = result.categories || [];
@@ -188,11 +186,38 @@ function deleteCategory(categoryId) {
             }
             
             // Remove the button from the DOM
-            const buttonToRemove = categoryContainer.querySelector(`[data-category-id="${categoryId}"]`);
-            if (buttonToRemove) {
-                buttonToRemove.remove();
-                alert('Selected category has been deleted.');
+            const categoryContainer = document.getElementById('category_buttons');
+            
+            if (categoryContainer) {
+                const buttonToRemove = categoryContainer.querySelector(`button[data-category-id="${categoryId}"]`);
+
+                if (buttonToRemove) {
+                    buttonToRemove.remove();
+                    console.log('Button removed from DOM:');
+
+                    alert('Selected category has been deleted.');
+
+                    window.location.reload(); // Reload the page to reflect changes
+                }
+                else{
+                    console.log('Button not found in DOM for removal.');
+                }
             }
+            
+            
+            // const buttonToRemove = document.querySelectorAll('#category_buttons > div');
+
+            // buttonToRemove.forEach(categoryButton => {
+            //     console.log('in for each section');
+            //     if (categoryButton.dataset.categoryId === categoryId.toString()) {
+            //         categoryButton.remove();
+            //         // window.close(chrome.runtime.getURL("notes.html"), "NoteTaker", "width=600,height=400");
+            //         window.close();
+            //         window.open(chrome.runtime.getURL("notes.html"), "NoteTaker", "width=600,height=400");
+
+            //     }
+            // });
+            // // const buttonToRemove = categoryContainer.querySelector(`[data-category-id="${categoryId}"]`);
         });
     });
 }
