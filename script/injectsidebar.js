@@ -198,13 +198,27 @@ function createNoteDisplay() {
     topContainer.style.gap = '35%';
     topContainer.style.paddingTop = '5px';
 
+    //The category
+    const noteCategory = document.createElement('div');
+    noteCategory.id = 'noteCategory';
+    noteCategory.style.fontSize = '11px';
+    noteCategory.style.color = '#666';
+    noteCategory.style.fontStyle = 'italic';
+    noteCategory.style.textAlign = 'center';
+    noteCategory.style.marginBottom = '10px';
+    noteCategory.style.padding = '2px 8px';
+    noteCategory.style.backgroundColor = '#f0f0f0';
+    // noteCategory.style.borderRadius = '12px';
+    noteCategory.style.display = 'inline-block';
+    noteCategory.style.alignSelf = 'center';
+
     // The content
     const noteContent = document.createElement('p');
     noteContent.id = 'noteContent';
     noteContent.style.fontSize = '12px';
     noteContent.contentEditable = true;
     noteContent.style.width = '100%';
-    noteContent.style.height = '95%';
+    noteContent.style.height = '90%';
     noteContent.style.marginTop = '-50px';
     noteContent.style.border = 'white';
     noteContent.style.borderWidth = '1.5px';
@@ -230,6 +244,7 @@ function createNoteDisplay() {
     topContainer.appendChild(backButton);
     topContainer.appendChild(noteTitle);
     noteContainer.appendChild(topContainer);
+    noteContainer.appendChild(noteCategory);
     noteContainer.appendChild(noteContent);
     noteContainer.appendChild(saveButton);
 
@@ -259,6 +274,7 @@ async function switchToNoteMode(noteId) {
     const noteContainer = document.getElementById('noteContainer');
     const noteTitle = document.getElementById('noteTitle');
     const noteContent = document.getElementById('noteContent');
+    const noteCategory = document.getElementById('noteCategory');
 
     sidebar.style.display = 'none';
     noteContainer.style.display = 'flex';
@@ -270,9 +286,12 @@ async function switchToNoteMode(noteId) {
     if (note) {
         noteTitle.textContent = note.title;
         noteContent.textContent = note.content;
+        noteCategory.textContent = note.category || '';
     } else {
         noteTitle.textContent = 'Note not found';
         noteContent.textContent = '';
+        noteCategory.textContent = '';
+
     }
 }
 
