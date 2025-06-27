@@ -198,27 +198,41 @@ function createNoteDisplay() {
     topContainer.style.gap = '35%';
     topContainer.style.paddingTop = '5px';
 
-    //The category (made editable)
+    const categoryContainer = document.createElement('div');
+    categoryContainer.style.display = 'flex';
+    categoryContainer.style.justifyContent = 'space-between';
+
+    const categoryLabel = document.createElement('p');
+    categoryLabel.textContent = 'Category:';
+    categoryLabel.style.fontSize = '12px';
+    categoryLabel.style.display = 'flex';
+    
+    //The category
     const noteCategory = document.createElement('input');
     noteCategory.id = 'noteCategory';
     noteCategory.type = 'text';
-    noteCategory.placeholder = 'Category (optional)';
+    // noteCategory.placeholder = 'Category (optional)';
     noteCategory.style.fontSize = '12px';
     noteCategory.style.color = '#ccc';
     noteCategory.style.backgroundColor = '#333';
     noteCategory.style.border = '1px solid #555';
     noteCategory.style.borderRadius = '4px';
-    noteCategory.style.padding = '6px 10px';
-    noteCategory.style.width = '100%';
+    // noteCategory.style.padding = '2px 4px';
+    noteCategory.style.height = '40px';
+    noteCategory.style.width = '60%';
     noteCategory.style.marginBottom = '10px';
+    noteCategory.style.marginLeft = '10px';
+
     noteCategory.style.textAlign = 'center';
+    noteCategory.style.display = 'flex'
+
 
     // The content
     const noteContent = document.createElement('textarea');
     noteContent.id = 'noteContent';
     noteContent.style.fontSize = '12px';
     noteContent.style.width = '100%';
-    noteContent.style.height = '60%';
+    noteContent.style.height = '90%';
     noteContent.style.backgroundColor = '#222';
     noteContent.style.color = 'white';
     noteContent.style.border = '1px solid #555';
@@ -242,11 +256,13 @@ function createNoteDisplay() {
     saveButton.style.marginTop = '10px';
     saveButton.textContent = 'Save Note';
 
-    // append top content
+    // append content
     topContainer.appendChild(backButton);
     topContainer.appendChild(noteTitle);
+    categoryContainer.appendChild(categoryLabel);
+    categoryContainer.appendChild(noteCategory);
     noteContainer.appendChild(topContainer);
-    noteContainer.appendChild(noteCategory);
+    noteContainer.appendChild(categoryContainer);
     noteContainer.appendChild(noteContent);
     noteContainer.appendChild(saveButton);
 
@@ -289,11 +305,11 @@ async function switchToNoteMode(noteId) {
     if (note) {
         noteTitle.textContent = note.title;
         noteContent.value = note.content;
-        noteCategory.value = note.category || '';
+        noteCategory.value = note.category || 'Default';
     } else {
         noteTitle.textContent = 'Note not found';
         noteContent.value = '';
-        noteCategory.value = '';
+        noteCategory.value = 'Default';
     }
 }
 
