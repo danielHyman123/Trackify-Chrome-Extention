@@ -198,39 +198,40 @@ function createNoteDisplay() {
     topContainer.style.gap = '35%';
     topContainer.style.paddingTop = '5px';
 
-    //The category
-    const noteCategory = document.createElement('div');
+    //The category (made editable)
+    const noteCategory = document.createElement('input');
     noteCategory.id = 'noteCategory';
-    noteCategory.style.fontSize = '11px';
-    noteCategory.style.color = '#666';
-    noteCategory.style.fontStyle = 'italic';
-    noteCategory.style.textAlign = 'center';
+    noteCategory.type = 'text';
+    noteCategory.placeholder = 'Category (optional)';
+    noteCategory.style.fontSize = '12px';
+    noteCategory.style.color = '#ccc';
+    noteCategory.style.backgroundColor = '#333';
+    noteCategory.style.border = '1px solid #555';
+    noteCategory.style.borderRadius = '4px';
+    noteCategory.style.padding = '6px 10px';
+    noteCategory.style.width = '100%';
     noteCategory.style.marginBottom = '10px';
-    noteCategory.style.padding = '2px 8px';
-    noteCategory.style.backgroundColor = '#f0f0f0';
-    // noteCategory.style.borderRadius = '12px';
-    noteCategory.style.display = 'inline-block';
-    noteCategory.style.alignSelf = 'center';
+    noteCategory.style.textAlign = 'center';
 
     // The content
-    const noteContent = document.createElement('p');
+    const noteContent = document.createElement('textarea');
     noteContent.id = 'noteContent';
     noteContent.style.fontSize = '12px';
-    noteContent.contentEditable = true;
     noteContent.style.width = '100%';
-    noteContent.style.height = '90%';
-    noteContent.style.marginTop = '-50px';
-    noteContent.style.border = 'white';
-    noteContent.style.borderWidth = '1.5px';
-    noteContent.style.borderStyle = 'solid';
-    noteContent.style.borderRadius = '5px';
-    noteContent.style.padding = '6px'; 
+    noteContent.style.height = '60%';
+    noteContent.style.backgroundColor = '#222';
+    noteContent.style.color = 'white';
+    noteContent.style.border = '1px solid #555';
+    noteContent.style.borderRadius = '4px';
+    noteContent.style.padding = '10px';
+    noteContent.style.resize = 'none';
+    noteContent.style.fontFamily = 'inherit';
 
     // Save button
     const saveButton = document.createElement('button');
     saveButton.id = 'noteSaveButton';
-    saveButton.width = '100%';
-    saveButton.height = '20px';
+    saveButton.style.width = '100%';
+    saveButton.style.height = '40px';
     saveButton.style.fontSize = '16px';
     saveButton.style.textAlign = 'center';
     saveButton.style.backgroundColor = '#084298';
@@ -238,6 +239,7 @@ function createNoteDisplay() {
     saveButton.style.border = 'none';
     saveButton.style.borderRadius = '4px';
     saveButton.style.cursor = 'pointer';
+    saveButton.style.marginTop = '10px';
     saveButton.textContent = 'Save Note';
 
     // append top content
@@ -252,9 +254,10 @@ function createNoteDisplay() {
     backButton.addEventListener('click', switchToDefaultMode);
     saveButton.addEventListener('click', async () => {
         const titleContent = noteTitle.textContent;
-        const contentContent = noteContent.textContent;
+        const contentContent = noteContent.value;
+        const categoryContent = noteCategory.value;
         const noteId = noteContainer.dataset.id;
-        await saveNote(noteId, titleContent, contentContent);
+        await saveNote(noteId, titleContent, contentContent, categoryContent);
         // Also have to send message to background.js to update the sidebar
     });
 
@@ -285,13 +288,12 @@ async function switchToNoteMode(noteId) {
 
     if (note) {
         noteTitle.textContent = note.title;
-        noteContent.textContent = note.content;
-        noteCategory.textContent = note.category || '';
+        noteContent.value = note.content;
+        noteCategory.value = note.category || '';
     } else {
         noteTitle.textContent = 'Note not found';
-        noteContent.textContent = '';
-        noteCategory.textContent = '';
-
+        noteContent.value = '';
+        noteCategory.value = '';
     }
 }
 
@@ -322,7 +324,7 @@ function getNote(noteId) {
     });
 }
 
-function saveNote(noteId, title, content) {
+function saveNote(noteId, title, content, category) {
     
     return new Promise((resolve) => {
         chrome.storage.local.get(['notes'], (result) => {
@@ -331,8 +333,9 @@ function saveNote(noteId, title, content) {
             if (noteIndex !== -1) {
                 notes[noteIndex].title = title;
                 notes[noteIndex].content = content;
+                notes[noteIndex].category = category;
             } else {
-                notes.push({ id: noteId, title: title, content: content });
+                notes.push({ id: noteId, title: title, content: content, category: category });
             }
             chrome.storage.local.set({ notes: notes }, () => {
                 console.log("Note saved:", noteId);
