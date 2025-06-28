@@ -2,21 +2,31 @@
 /* Chrome storage API is used to store data in the browser.
    By: Daniel */
 
-// Check if we're in the popup/extension page context
+//Track curent Category
+let currentCategory = '';
+
+// Check if we're in the popup/extension page context, then run all notes.html functionality (main function)
 if (document.getElementById('content')) {
     // This is the popup page - handle save button
     const contentArea = document.getElementById('content');
     const titleArea = document.getElementById('title_input');
     const saveButton = document.getElementById('saveButton');
+    const categoryButton = document.getElementById('categoryButton');
     // const deleteButton = document.getElementById('deleteButton');
 
+    loadCategories();
+
+//Unnecessary code?
     // Load existing note content when page loads
-    chrome.storage.local.get(['currentNote'], (result) => {
-        if (result.currentNote) {
-            contentArea.value = result.currentNote.content;
-            titleArea.value = result.currentNote.title;
-        }
-    });
+    // chrome.storage.local.get(['currentNote'], (result) => {
+    //     if (result.currentNote) {
+    //         contentArea.value = result.currentNote.content;
+    //         titleArea.value = result.currentNote.title;
+    //     }
+    // });
+
+    // Category button event listener
+    categoryButton.addEventListener('click', createCategory);
 
     // Save button handler for popup
     saveButton.addEventListener('click', () => {
@@ -41,8 +51,9 @@ if (document.getElementById('content')) {
                     title: titleText,
                     content: noteText,
                     url: response.url || "Unknown URL", // Add URL to the note
-                    timestamp: new Date().toISOString() // Unnessasary timestamp
-                };
+                    timestamp: new Date().toISOString(), // Timestamp for users to see when the note was created
+                    category: currentCategory ? currentCategory.name: ''                 
+                 };
                 
                 notes.push(new_note);
 
@@ -67,5 +78,158 @@ if (document.getElementById('content')) {
     // Auto-save current text as user types (optional)
     contentArea.addEventListener('input', () => {
         chrome.storage.local.set({ currentNote: { title: titleArea.value, content: contentArea.value } });
+    });
+}
+
+// Creates a new Category button in categoryContainer in notes.html
+function createCategory() {
+    // Prompt user for category name
+    const categoryName = prompt('Enter category name:');
+    
+    // Check if user cancelled or entered empty name
+    if (!categoryName || categoryName.trim() === '') {
+        return;
+    }
+
+    const trimmedName = categoryName.trim();
+
+    // Get existing categories from storage
+    chrome.storage.local.get(['categories'], (result) => {
+        const categories = result.categories || [];
+        
+        // Check if category already exists
+        const categoryExists = categories.some(cat => cat.name.toLowerCase() === trimmedName.toLowerCase());
+        if (categoryExists) {
+            alert('Category already exists!');
+            return;
+        }
+
+        // Create new category object
+        const newCategory = {
+            id: Date.now(),
+            name: trimmedName
+        };
+
+        // Add to categories array
+        categories.push(newCategory);
+
+        // Save to storage
+        chrome.storage.local.set({ categories: categories }, () => {
+            console.log('Category saved:', newCategory);
+            // Create and display the new category button
+            createCategoryButton(newCategory);
+        });
+    });
+}
+
+// Function to create a category button element
+function createCategoryButton(category) {
+    const categoryContainer = document.getElementById('category_buttons');
+
+    const newCategoryButton = document.createElement('button');
+    newCategoryButton.textContent = category.name;
+    newCategoryButton.className = 'category-btn';
+    newCategoryButton.dataset.categoryId = category.id;
+    
+    // Add click event listener for category selection
+    newCategoryButton.addEventListener('click', () => {
+        selectCategory(category);
+    });
+
+    // Add right-click context menu for deletion 
+    newCategoryButton.addEventListener('contextmenu', (e) => {
+        e.preventDefault();
+        if (confirm(`Delete category "${category.name}"?`)) {
+            deleteCategory(category.id);
+        }
+    });
+
+    categoryContainer.appendChild(newCategoryButton);
+}
+
+// Function to handle category selection
+function selectCategory(category) {
+    console.log('Selected category:', category.name);
+    
+    currentCategory = category; // Update currentCategory variable
+
+    const categoryContainer = document.getElementById('category_buttons');
+
+    // Remove active class from all category buttons
+    const allCategoryButtons = categoryContainer.querySelectorAll('.category-btn');
+    allCategoryButtons.forEach(btn => btn.classList.remove('active'));
+    allCategoryButtons.forEach(btn => btn.style.backgroundColor = ''); // Reset background color (can't be same line as above)
+
+    
+    // Add active class to selected button
+    const selectedButton = categoryContainer.querySelector(`[data-category-id="${category.id}"]`);
+    if (selectedButton) {
+        selectedButton.classList.add('active');
+        selectedButton.style.backgroundColor = 'cyan'; // Change color to indicate selection
+    }
+
+    alert(`Selected category: ${category.name}`);
+}
+
+// Function to delete a category
+function deleteCategory(categoryId) {
+    chrome.storage.local.get(['categories'], (result) => {
+        const categories = result.categories || [];
+        const updatedCategories = categories.filter(cat => cat.id !== categoryId);
+        
+        chrome.storage.local.set({ categories: updatedCategories }, () => {
+            console.log('Category deleted:', categoryId);
+            
+            // If Selected Category is deleted, reset currentCategory
+            if (currentCategory && currentCategory.id === categoryId) {
+                currentCategory = '';
+            }
+            
+            // Remove the button from the DOM
+            const categoryContainer = document.getElementById('category_buttons');
+            
+            if (categoryContainer) {
+                const buttonToRemove = categoryContainer.querySelector(`button[data-category-id="${categoryId}"]`);
+
+                if (buttonToRemove) {
+                    buttonToRemove.remove();
+                    console.log('Button removed from DOM:');
+
+                    alert('Selected category has been deleted.');
+
+                    window.location.reload(); // Reload the page to reflect changes
+                }
+                else{
+                    console.log('Button not found in DOM for removal.');
+                }
+            }
+            
+            
+            // const buttonToRemove = document.querySelectorAll('#category_buttons > div');
+
+            // buttonToRemove.forEach(categoryButton => {
+            //     console.log('in for each section');
+            //     if (categoryButton.dataset.categoryId === categoryId.toString()) {
+            //         categoryButton.remove();
+            //         // window.close(chrome.runtime.getURL("notes.html"), "NoteTaker", "width=600,height=400");
+            //         window.close();
+            //         window.open(chrome.runtime.getURL("notes.html"), "NoteTaker", "width=600,height=400");
+
+            //     }
+            // });
+            // // const buttonToRemove = categoryContainer.querySelector(`[data-category-id="${categoryId}"]`);
+        });
+    });
+}
+
+// Function to load and display existing categories
+function loadCategories() {
+    chrome.storage.local.get(['categories'], (result) => {
+        const categories = result.categories || [];
+                
+        // Create buttons for each category
+        categories.forEach(category => {
+            createCategoryButton(category);
+        });
     });
 }

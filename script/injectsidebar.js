@@ -198,25 +198,54 @@ function createNoteDisplay() {
     topContainer.style.gap = '35%';
     topContainer.style.paddingTop = '5px';
 
+    const categoryContainer = document.createElement('div');
+    categoryContainer.style.display = 'flex';
+    categoryContainer.style.justifyContent = 'space-between';
+
+    const categoryLabel = document.createElement('p');
+    categoryLabel.textContent = 'Category:';
+    categoryLabel.style.fontSize = '12px';
+    categoryLabel.style.display = 'flex';
+    
+    //The category
+    const noteCategory = document.createElement('input');
+    noteCategory.id = 'noteCategory';
+    noteCategory.type = 'text';
+    // noteCategory.placeholder = 'Category (optional)';
+    noteCategory.style.fontSize = '12px';
+    noteCategory.style.color = '#ccc';
+    noteCategory.style.backgroundColor = '#333';
+    noteCategory.style.border = '1px solid #555';
+    noteCategory.style.borderRadius = '4px';
+    // noteCategory.style.padding = '2px 4px';
+    noteCategory.style.height = '40px';
+    noteCategory.style.width = '60%';
+    noteCategory.style.marginBottom = '10px';
+    noteCategory.style.marginLeft = '10px';
+
+    noteCategory.style.textAlign = 'center';
+    noteCategory.style.display = 'flex'
+
+
     // The content
-    const noteContent = document.createElement('p');
+    const noteContent = document.createElement('textarea');
     noteContent.id = 'noteContent';
     noteContent.style.fontSize = '12px';
-    noteContent.contentEditable = true;
     noteContent.style.width = '100%';
-    noteContent.style.height = '95%';
-    noteContent.style.marginTop = '-50px';
-    noteContent.style.border = 'white';
-    noteContent.style.borderWidth = '1.5px';
-    noteContent.style.borderStyle = 'solid';
-    noteContent.style.borderRadius = '5px';
-    noteContent.style.padding = '6px'; 
+    noteContent.style.height = '90%';
+    noteContent.style.backgroundColor = '#222';
+    noteContent.style.color = 'white';
+    noteContent.style.border = '1px solid #555';
+    noteContent.style.borderRadius = '4px';
+    noteContent.style.padding = '10px';
+    noteContent.style.resize = 'none';
+    noteContent.style.fontFamily = 'inherit';
 
     // Save button
     const saveButton = document.createElement('button');
     saveButton.id = 'noteSaveButton';
-    saveButton.width = '100%';
-    saveButton.height = '20px';
+    saveButton.style.width = '100%';
+    saveButton.style.height = '40px';
     saveButton.style.fontSize = '16px';
     saveButton.style.textAlign = 'center';
     saveButton.style.backgroundColor = '#084298';
@@ -224,12 +253,16 @@ function createNoteDisplay() {
     saveButton.style.border = 'none';
     saveButton.style.borderRadius = '4px';
     saveButton.style.cursor = 'pointer';
+    saveButton.style.marginTop = '10px';
     saveButton.textContent = 'Save Note';
 
-    // append top content
+    // append content
     topContainer.appendChild(backButton);
     topContainer.appendChild(noteTitle);
+    categoryContainer.appendChild(categoryLabel);
+    categoryContainer.appendChild(noteCategory);
     noteContainer.appendChild(topContainer);
+    noteContainer.appendChild(categoryContainer);
     noteContainer.appendChild(noteContent);
     noteContainer.appendChild(saveButton);
 
@@ -237,9 +270,10 @@ function createNoteDisplay() {
     backButton.addEventListener('click', switchToDefaultMode);
     saveButton.addEventListener('click', async () => {
         const titleContent = noteTitle.textContent;
-        const contentContent = noteContent.textContent;
+        const contentContent = noteContent.value;
+        const categoryContent = noteCategory.value;
         const noteId = noteContainer.dataset.id;
-        await saveNote(noteId, titleContent, contentContent);
+        await saveNote(noteId, titleContent, contentContent, categoryContent);
         // Also have to send message to background.js to update the sidebar
     });
 
@@ -259,6 +293,7 @@ async function switchToNoteMode(noteId) {
     const noteContainer = document.getElementById('noteContainer');
     const noteTitle = document.getElementById('noteTitle');
     const noteContent = document.getElementById('noteContent');
+    const noteCategory = document.getElementById('noteCategory');
 
     sidebar.style.display = 'none';
     noteContainer.style.display = 'flex';
@@ -269,10 +304,12 @@ async function switchToNoteMode(noteId) {
 
     if (note) {
         noteTitle.textContent = note.title;
-        noteContent.textContent = note.content;
+        noteContent.value = note.content;
+        noteCategory.value = note.category || 'Default';
     } else {
         noteTitle.textContent = 'Note not found';
-        noteContent.textContent = '';
+        noteContent.value = '';
+        noteCategory.value = 'Default';
     }
 }
 
@@ -303,7 +340,7 @@ function getNote(noteId) {
     });
 }
 
-function saveNote(noteId, title, content) {
+function saveNote(noteId, title, content, category) {
     
     return new Promise((resolve) => {
         chrome.storage.local.get(['notes'], (result) => {
@@ -312,8 +349,9 @@ function saveNote(noteId, title, content) {
             if (noteIndex !== -1) {
                 notes[noteIndex].title = title;
                 notes[noteIndex].content = content;
+                notes[noteIndex].category = category;
             } else {
-                notes.push({ id: noteId, title: title, content: content });
+                notes.push({ id: noteId, title: title, content: content, category: category });
             }
             chrome.storage.local.set({ notes: notes }, () => {
                 console.log("Note saved:", noteId);
@@ -574,12 +612,33 @@ function handleSearch() {
     // Loop through each note button and toggle visibility based on search term
     wrappers.forEach(wrapper => {
         const noteButton = wrapper.querySelector('button'); // Get the first button in the wrapper
-        const text = noteButton.textContent.toLowerCase();
+        const noteId = noteButton.dataset.id;
+        // const text = noteButton.textContent.toLowerCase();
         
-        if (text.toLowerCase().includes(searchTerm)) {
-            wrapper.style.display = 'flex'; // Show the wrapper
-        } else {
-            wrapper.style.display = 'none'; // Hide the wrapper
-        }
+        // Find the note object to get its URL
+        chrome.storage.local.get(['notes'], (result) => {
+            const notes = result.notes || [];
+            const noteObj = notes.find(note => note.id.toString() === noteId);
+            
+            if (noteObj) {
+                const titleText = noteObj.title.toLowerCase();
+                const urlText = noteObj.url ? noteObj.url.toLowerCase() : '';
+                const contentText = noteObj.content ? noteObj.content.toLowerCase() : '';
+                const catagoryText = noteObj.category ? noteObj.category.toLowerCase() : '';
+                
+                // Check if search term matches title, URL, or content
+                const matchesTitle = titleText.includes(searchTerm);
+                const matchesUrl = urlText.includes(searchTerm);
+                const matchesContent = contentText.includes(searchTerm);
+                const matchesCategory = catagoryText.includes(searchTerm);
+                
+                // Show wrapper if any field matches
+                if (matchesTitle || matchesUrl || matchesContent || matchesCategory) {
+                    wrapper.style.display = 'flex';
+                } else {
+                    wrapper.style.display = 'none';
+                }
+            }
+        });
     });
 }
