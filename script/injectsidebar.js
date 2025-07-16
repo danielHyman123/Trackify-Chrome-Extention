@@ -116,7 +116,7 @@ function createSidebarToggleBtn() {
     const sidebarToggleBtn = document.createElement('button');
     sidebarToggleBtn.id = 'toggleSidebar';
     sidebarToggleBtn.innerHTML = ">";
-    sidebarToggleBtn.style.position = 'absolute';
+    sidebarToggleBtn.style.position = 'fixed';
     sidebarToggleBtn.style.right = window.SIDEBARWIDTH + 'vw';
     sidebarToggleBtn.style.top = '0';
     sidebarToggleBtn.style.width = '10px';
@@ -138,7 +138,6 @@ function createSidebarToggleBtn() {
     sidebarToggleBtn.addEventListener('click', toggleSidebar);
 }
 
-/*************  ✨ Windsurf Command ⭐  *************/
 /**
  * Creates the note display when a note is clicked from the sidebar.
  *
@@ -147,7 +146,6 @@ function createSidebarToggleBtn() {
  * The back button is given an action listener to switch to the default mode.
  * The save button is given an action listener to save the note and send a message to the background script to update the sidebar.
  */
-/*******  03a10b0e-9f0a-4f85-86cd-975c5190d53e  *******/
 function createNoteDisplay() {
     const sidebar = document.getElementById('myExtensionSidebar');
 
@@ -169,6 +167,40 @@ function createNoteDisplay() {
     noteTitle.style.width = '50%';
     noteTitle.style.textAlign = 'center';
     noteTitle.style.translate = '-30%';
+    
+    // website button container
+    const websiteBtnContainer = document.createElement('div');
+    websiteBtnContainer.style.display = 'flex';
+    websiteBtnContainer.style.alignItems = 'center';
+    websiteBtnContainer.style.justifyContent = 'space-between';
+    websiteBtnContainer.style.width = '100%';
+    websiteBtnContainer.style.marginTop = '10px';
+
+    // Url 
+    const urlBtn = document.createElement('button');
+    urlBtn.id = 'urlBtn';
+    urlBtn.style.fontSize = '12px';
+    urlBtn.style.width = '50%';
+    urlBtn.style.height = '30px';
+    urlBtn.style.textAlign = 'center';
+    urlBtn.style.cursor = 'pointer';
+
+    // Go to website
+    const aBtn = document.createElement('a');
+    aBtn.innerHTML = 'Go to website';
+    aBtn.id = 'aBtn';
+    aBtn.target = '_blank';
+    aBtn.style.fontSize = '10px';
+    aBtn.style.width = '20%';
+    aBtn.style.height = '30px';
+    aBtn.style.textAlign = 'center';
+    aBtn.style.cursor = 'pointer';
+    aBtn.style.backgroundColor = '#FFFFFF';
+
+    // add elements to website button container
+    websiteBtnContainer.appendChild(urlBtn);
+    websiteBtnContainer.appendChild(aBtn);
+
 
     // Back button
     const backButton = document.createElement('button');
@@ -206,7 +238,7 @@ function createNoteDisplay() {
     categoryLabel.textContent = 'Category:';
     categoryLabel.style.fontSize = '12px';
     categoryLabel.style.display = 'flex';
-    
+
     //The category
     const noteCategory = document.createElement('input');
     noteCategory.id = 'noteCategory';
@@ -264,10 +296,13 @@ function createNoteDisplay() {
     noteContainer.appendChild(topContainer);
     noteContainer.appendChild(categoryContainer);
     noteContainer.appendChild(noteContent);
+    noteContainer.appendChild(websiteBtnContainer);
     noteContainer.appendChild(saveButton);
 
     // action listener for back button	
     backButton.addEventListener('click', switchToDefaultMode);
+
+    // action listener for save button
     saveButton.addEventListener('click', async () => {
         const titleContent = noteTitle.textContent;
         const contentContent = noteContent.value;
@@ -275,6 +310,15 @@ function createNoteDisplay() {
         const noteId = noteContainer.dataset.id;
         await saveNote(noteId, titleContent, contentContent, categoryContent);
         // Also have to send message to background.js to update the sidebar
+    });
+
+    // action listener for url button
+    urlBtn.addEventListener('click', async () => {
+        navigator.clipboard.writeText(urlBtn.dataset.website).then(() => {
+            alert('URL copied to clipboard');
+        }, (e) => {
+            console.error(e);
+        });
     });
 
     sidebar.appendChild(noteContainer);
@@ -294,6 +338,8 @@ async function switchToNoteMode(noteId) {
     const noteTitle = document.getElementById('noteTitle');
     const noteContent = document.getElementById('noteContent');
     const noteCategory = document.getElementById('noteCategory');
+    const urlBtn = document.getElementById('urlBtn');
+    const aBtn = document.getElementById('aBtn');
 
     sidebar.style.display = 'none';
     noteContainer.style.display = 'flex';
@@ -306,10 +352,14 @@ async function switchToNoteMode(noteId) {
         noteTitle.textContent = note.title;
         noteContent.value = note.content;
         noteCategory.value = note.category || 'Default';
+        urlBtn.innerHTML = note.url.replace(/.+\/\/|www.|\..+/g, '') || '';
+        urlBtn.dataset.website = note.url;
+        aBtn.href = note.url;
     } else {
         noteTitle.textContent = 'Note not found';
         noteContent.value = '';
         noteCategory.value = 'Default';
+        urlBtn.innerHTML = 'No Url Found';
     }
 }
 
@@ -341,7 +391,7 @@ function getNote(noteId) {
 }
 
 function saveNote(noteId, title, content, category) {
-    
+
     return new Promise((resolve) => {
         chrome.storage.local.get(['notes'], (result) => {
             const notes = result.notes || [];
@@ -557,7 +607,7 @@ function openNotes() {
         action: 'saveCurrentTab'
     }, (response) => {
         console.log("Current tab saved:", response);
-        
+
         const notesWindow = window.open(chrome.runtime.getURL("notes.html"), "NoteTaker", "width=600,height=400");
         if (!notesWindow) {
             console.error("Failed to open notes window. Please allow pop-ups for this site.");
@@ -614,24 +664,24 @@ function handleSearch() {
         const noteButton = wrapper.querySelector('button'); // Get the first button in the wrapper
         const noteId = noteButton.dataset.id;
         // const text = noteButton.textContent.toLowerCase();
-        
+
         // Find the note object to get its URL
         chrome.storage.local.get(['notes'], (result) => {
             const notes = result.notes || [];
             const noteObj = notes.find(note => note.id.toString() === noteId);
-            
+
             if (noteObj) {
                 const titleText = noteObj.title.toLowerCase();
                 const urlText = noteObj.url ? noteObj.url.toLowerCase() : '';
                 const contentText = noteObj.content ? noteObj.content.toLowerCase() : '';
                 const catagoryText = noteObj.category ? noteObj.category.toLowerCase() : '';
-                
+
                 // Check if search term matches title, URL, or content
                 const matchesTitle = titleText.includes(searchTerm);
                 const matchesUrl = urlText.includes(searchTerm);
                 const matchesContent = contentText.includes(searchTerm);
                 const matchesCategory = catagoryText.includes(searchTerm);
-                
+
                 // Show wrapper if any field matches
                 if (matchesTitle || matchesUrl || matchesContent || matchesCategory) {
                     wrapper.style.display = 'flex';
