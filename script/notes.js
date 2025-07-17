@@ -38,7 +38,7 @@ if (document.getElementById('content')) {
             }
 
             //Clear highlighted text from storage after use
-            chrome.storage.local.remove('highlighted');
+            // chrome.storage.local.remove('highlighted');
         }
         //note.html is opened though sidebar or index.html
         else{
@@ -75,7 +75,8 @@ if (document.getElementById('content')) {
                     content: noteText,
                     url: response.url || "Unknown URL", // Add URL to the note
                     timestamp: new Date().toISOString(), // Timestamp for users to see when the note was created
-                    category: currentCategory ? currentCategory.name: ''                 
+                    highlighted: highlightedTextElement,
+                    category: currentCategory ? currentCategory.name: ''                  
                  };
                 
                 notes.push(new_note);
