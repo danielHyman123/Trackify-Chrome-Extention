@@ -267,9 +267,6 @@ function createNoteDisplay() {
         const contentContent = noteContent.textContent;
         const noteId = noteContainer.dataset.id;
     
-        // Get the original highlighted text from the data attribute
-        const highlightedContent = highlighted.dataset.originalHighlighted || '';
-    
         console.log("Saving note with highlighted text:", highlightedContent);
         await saveNote(noteId, titleContent, contentContent, highlightedContent);
     });
@@ -306,16 +303,12 @@ async function switchToNoteMode(noteId) {
         
         // Display the highlighted text that was saved with the note
         const highlightedText = note.highlightedText || '';
-        noteHighlighted.textContent = "Highlighted Text: " + (highlightedText || 'None');
+        noteHighlighted.textContent = 'Highlighted Text: ' + (highlightedText || 'None');
         
-        // Store the original highlighted text in a data attribute for saving later
-        noteHighlighted.dataset.originalHighlighted = highlightedText;
-
     } else {
         noteTitle.textContent = 'Note not found';
         noteContent.textContent = '';
         noteHighlighted.textContent = 'Highlighted Text: None';
-        noteHighlighted.dataset.originalHighlighted = '';
     }
 }
 

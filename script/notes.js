@@ -34,7 +34,7 @@ if (document.getElementById('content')) {
         if (highlighted){
             //Display highlighted text
             if (highlightedTextElement){
-                highlightedTextElement.textContent = "Highlighted Text: " + highlighted;
+                highlightedTextElement.textContent = highlighted;
             }
 
             // //Clear highlighted text from storage after use
@@ -83,7 +83,6 @@ if (document.getElementById('content')) {
                  };
                 
                 notes.push(new_note);
-                console.log(highlightedTextElement + 'hello');
 
                 chrome.storage.local.set({
                     notes: notes,
