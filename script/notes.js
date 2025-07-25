@@ -37,16 +37,19 @@ if (document.getElementById('content')) {
                 highlightedTextElement.textContent = "Highlighted Text: " + highlighted;
             }
 
-            //Clear highlighted text from storage after use
-            // chrome.storage.local.remove('highlighted');
+            // //Clear highlighted text from storage after use
+            chrome.storage.local.remove('highlighted');
         }
         //note.html is opened though sidebar or index.html
-        else{
-            if (highlightedTextElement){
-                highlightedTextElement.textContent = ''
-            }
+        else if (highlightedTextElement){
+            highlightedTextElement.textContent = ''
         }
+
+        // chrome.runtime.sendMessage({ 
+        //     action: "getHighlighted", highlighted: highlighted 
+        // });
     })
+
 
     // Category button event listener
     categoryButton.addEventListener('click', createCategory);
@@ -75,11 +78,12 @@ if (document.getElementById('content')) {
                     content: noteText,
                     url: response.url || "Unknown URL", // Add URL to the note
                     timestamp: new Date().toISOString(), // Timestamp for users to see when the note was created
-                    highlighted: highlightedTextElement,
+                    highlightedText: highlightedTextElement.textContent,
                     category: currentCategory ? currentCategory.name: ''                  
                  };
                 
                 notes.push(new_note);
+                console.log(highlightedTextElement + 'hello');
 
                 chrome.storage.local.set({
                     notes: notes,
@@ -100,6 +104,20 @@ if (document.getElementById('content')) {
                 });
             });
         });
+
+        //Get Highlighted text before saving
+        // chrome.runtime.sendMessage({
+        //     action: 'getHighlighted'
+        // }, (response) =>{
+        //     chrome.storage.local.get(['highlighted'], (result) =>{
+        //         const highlighted = result.highlighted || '';
+
+        //         //Clear highlighted text from storage after use
+        //         chrome.storage.local.remove('highlighted');
+
+        //     })    
+        // })
+
     });
 
     // Auto-save current text as user types

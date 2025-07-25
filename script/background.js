@@ -23,8 +23,8 @@ chrome.contextMenus.onClicked.addListener((info, tab) => {
     //Send message to content script in current tab.
     const highlighted = info.selectionText || '';
         
-        //Open notes.html as a popup when the notes button is clicked after right clicking
-    chrome.storage.local.set({highlighted}, () => {
+    //Open notes.html as a popup when the notes button is clicked after right clicking
+    chrome.storage.local.set({highlighted: highlighted}, () => {
         chrome.windows.create({
             url: chrome.runtime.getURL('notes.html'),
             type: "popup", 
@@ -95,4 +95,14 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
         
         return true;
     }
+
+    // //Handle highlighted text as note attribute
+    // if (message.action === 'getHighlighted') {
+    //     console.log("Received:", message.highlighted);
+    //     chrome.runtime.sendMessage({ action: "getData" }, (response) => {
+    //         console.log("Got highlighted text from background:", response);
+    //     });
+
+    //     sendResponse("acknowledged");
+    // }
 });

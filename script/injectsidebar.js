@@ -44,14 +44,6 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
         initNotesUI(); // Call the function to refresh the sidebar UI
         sendResponse({success: true});  //Built-in chrome function which sends a response back to the sender(notes.js)
     }
-
-    //Checks if the message is to get highlighted text
-    if (message.action === 'highlightedText'){
-        // window.getSelection().removeAllRanges(); // Clear any existing selections
-        const selection = window.getSelection().toString();
-        sendResponse({highlighted: selection}); // Send the highlighted text back to the sender
-        return true;
-    }
 });
 
 function createSidebar() {
@@ -81,6 +73,7 @@ function createSidebar() {
     title.style.fontSize = '18px';
     title.textContent = 'My Notes';
     title.style.marginTop = '0';
+    title.style.color = 'white';
 
     //Create PLUS button
     const plusButton = document.createElement('button');
@@ -193,6 +186,7 @@ function createNoteDisplay() {
     noteTitle.style.width = '50%';
     noteTitle.style.textAlign = 'center';
     noteTitle.style.translate = '-30%';
+    noteTitle.style.color = "white";
 
     // Back button
     const backButton = document.createElement('button');
@@ -228,13 +222,21 @@ function createNoteDisplay() {
     noteContent.style.fontSize = '12px';
     noteContent.contentEditable = true;
     noteContent.style.width = '100%';
-    noteContent.style.height = '95%';
+    noteContent.style.height = '90%';
     noteContent.style.marginTop = '-50px';
     noteContent.style.border = 'white';
     noteContent.style.borderWidth = '1.5px';
     noteContent.style.borderStyle = 'solid';
     noteContent.style.borderRadius = '5px';
     noteContent.style.padding = '6px'; 
+
+    //Highlighted Text
+    const highlighted = document.createElement('p');
+    highlighted.id = 'highlighted';
+    highlighted.style.width = '100%';
+    highlighted.style.height = '5%';
+    highlighted.style.padding = '6px'; 
+    highlighted.style.color = 'white';
 
     // Save button
     const saveButton = document.createElement('button');
@@ -255,6 +257,7 @@ function createNoteDisplay() {
     topContainer.appendChild(noteTitle);
     noteContainer.appendChild(topContainer);
     noteContainer.appendChild(noteContent);
+    noteContainer.appendChild(highlighted);
     noteContainer.appendChild(saveButton);
 
     // action listener for back button	
@@ -263,9 +266,14 @@ function createNoteDisplay() {
         const titleContent = noteTitle.textContent;
         const contentContent = noteContent.textContent;
         const noteId = noteContainer.dataset.id;
-        await saveNote(noteId, titleContent, contentContent);
-        // Also have to send message to background.js to update the sidebar
+    
+        // Get the original highlighted text from the data attribute
+        const highlightedContent = highlighted.dataset.originalHighlighted || '';
+    
+        console.log("Saving note with highlighted text:", highlightedContent);
+        await saveNote(noteId, titleContent, contentContent, highlightedContent);
     });
+
 
     sidebar.appendChild(noteContainer);
 }
@@ -283,6 +291,7 @@ async function switchToNoteMode(noteId) {
     const noteContainer = document.getElementById('noteContainer');
     const noteTitle = document.getElementById('noteTitle');
     const noteContent = document.getElementById('noteContent');
+    const noteHighlighted = document.getElementById('highlighted');
 
     sidebar.style.display = 'none';
     noteContainer.style.display = 'flex';
@@ -294,9 +303,19 @@ async function switchToNoteMode(noteId) {
     if (note) {
         noteTitle.textContent = note.title;
         noteContent.textContent = note.content;
+        
+        // Display the highlighted text that was saved with the note
+        const highlightedText = note.highlightedText || '';
+        noteHighlighted.textContent = "Highlighted Text: " + (highlightedText || 'None');
+        
+        // Store the original highlighted text in a data attribute for saving later
+        noteHighlighted.dataset.originalHighlighted = highlightedText;
+
     } else {
         noteTitle.textContent = 'Note not found';
         noteContent.textContent = '';
+        noteHighlighted.textContent = 'Highlighted Text: None';
+        noteHighlighted.dataset.originalHighlighted = '';
     }
 }
 
@@ -327,26 +346,39 @@ function getNote(noteId) {
     });
 }
 
-function saveNote(noteId, title, content) {
-    
+function saveNote(noteId, title, content, highlightedText) {
     return new Promise((resolve) => {
         chrome.storage.local.get(['notes'], (result) => {
             const notes = result.notes || [];
+
             const noteIndex = notes.findIndex(note => String(note.id) === String(noteId));
             if (noteIndex !== -1) {
+                // Update existing note
                 notes[noteIndex].title = title;
                 notes[noteIndex].content = content;
+                // Preserve the original highlighted text (don't change it when editing)
+                if (highlightedText !== undefined) {
+                    notes[noteIndex].highlightedText = highlightedText;
+                }
             } else {
-                notes.push({ id: noteId, title: title, content: content });
+                // Create new note (this shouldn't happen in sidebar context, but just in case)
+                notes.push({ 
+                    id: noteId, 
+                    title: title, 
+                    content: content, 
+                    highlightedText: highlightedText || 'Empty' 
+                });
             }
+            
             chrome.storage.local.set({ notes: notes }, () => {
-                console.log("Note saved:", noteId);
-                showToast("Note Succesfully Saved!");
+                console.log("Note saved with highlighted text:", highlightedText);
+                showToast("Note Successfully Saved!");
                 resolve();
             });
-        })
-    })
+        });
+    });
 }
+
 
 
 window.SIDEBARWIDTH = 20;
@@ -599,10 +631,4 @@ function handleSearch() {
             wrapper.style.display = 'none'; // Hide the wrapper
         }
     });
-}
-
-//Function to save highlighted text
-function getHighlightedText(){
-    const highlightedText = window.getSelection().toString();
-    console.log("Highlighted text:", highlightedText);
 }
