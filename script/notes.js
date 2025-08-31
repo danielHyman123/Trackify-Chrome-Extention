@@ -1,9 +1,8 @@
-
 /* Chrome storage API is used to store data in the browser.
    By: Daniel */
 
-//Track curent Category
-let currentCategory = '';
+//Track curent Categories
+let selectedCategories = [];
 
 // Check if we're in the popup/extension page context, then run all notes.html functionality (main function)
 if (document.getElementById('content')) {
@@ -12,7 +11,6 @@ if (document.getElementById('content')) {
     const titleArea = document.getElementById('title_input');
     const saveButton = document.getElementById('saveButton');
     const categoryButton = document.getElementById('categoryButton');
-    // const deleteButton = document.getElementById('deleteButton');
 
     loadCategories();
 
@@ -33,8 +31,11 @@ if (document.getElementById('content')) {
             console.log("Current URL:", response.url);
             
             // Save to chrome storage with URL included
-            chrome.storage.local.get(['notes'], (result) => {
+            chrome.storage.local.get(['notes', 'categories'], (result) => {
                 const notes = result.notes || [];
+                const allCategories = result.categories || [];
+
+                const selectedCategoryObjects = allCategories.filter(cat => selectedCategories.includes(cat.id));
 
                 const new_note = {
                     // use a number representing the exact current time as id
@@ -43,7 +44,7 @@ if (document.getElementById('content')) {
                     content: noteText,
                     url: response.url || "Unknown URL", // Add URL to the note
                     timestamp: new Date().toISOString(), // Timestamp for users to see when the note was created
-                    category: currentCategory ? currentCategory.name: ''                 
+                    category: selectedCategoryObjects.map(cat => cat.name) // Store array of names
                  };
                 
                 notes.push(new_note);
@@ -55,6 +56,15 @@ if (document.getElementById('content')) {
                     console.log("Note saved with URL:", new_note);
                     contentArea.value = ''; // Clear textarea
                     titleArea.value = ''; // Clear titleArea
+
+                    // clear selection
+                    selectedCategories = [];
+                    // also remove active class from all buttons
+                    const allCategoryButtons = document.querySelectorAll('#category_buttons .category-btn');
+                    allCategoryButtons.forEach(btn => {
+                        btn.classList.remove('active');
+                        btn.style.backgroundColor = '';
+                    });
 
                     // Send message to background script to update sidebar
                     chrome.runtime.sendMessage({
@@ -74,10 +84,10 @@ if (document.getElementById('content')) {
 
 // Creates a new Category button in categoryContainer in notes.html
 function createCategory() {
-    // Prompt user for category name
-    const categoryName = prompt('Enter category name:');
+    const categoryInput = document.getElementById('category_input');
+    const categoryName = categoryInput.value;
     
-    // Check if user cancelled or entered empty name
+    // Check if user entered empty name
     if (!categoryName || categoryName.trim() === '') {
         return;
     }
@@ -91,7 +101,7 @@ function createCategory() {
         // Check if category already exists
         const categoryExists = categories.some(cat => cat.name.toLowerCase() === trimmedName.toLowerCase());
         if (categoryExists) {
-            alert('Category already exists!');
+            console.log('Category already exists!');
             return;
         }
 
@@ -109,6 +119,7 @@ function createCategory() {
             console.log('Category saved:', newCategory);
             // Create and display the new category button
             createCategoryButton(newCategory);
+            categoryInput.value = ''; // Clear input
         });
     });
 }
@@ -140,26 +151,26 @@ function createCategoryButton(category) {
 
 // Function to handle category selection
 function selectCategory(category) {
-    console.log('Selected category:', category.name);
+    console.log('Toggling category:', category.name);
     
-    currentCategory = category; // Update currentCategory variable
-
     const categoryContainer = document.getElementById('category_buttons');
+    const button = categoryContainer.querySelector(`[data-category-id="${category.id}"]`);
 
-    // Remove active class from all category buttons
-    const allCategoryButtons = categoryContainer.querySelectorAll('.category-btn');
-    allCategoryButtons.forEach(btn => btn.classList.remove('active'));
-    allCategoryButtons.forEach(btn => btn.style.backgroundColor = ''); // Reset background color (can't be same line as above)
-
-    
-    // Add active class to selected button
-    const selectedButton = categoryContainer.querySelector(`[data-category-id="${category.id}"]`);
-    if (selectedButton) {
-        selectedButton.classList.add('active');
-        selectedButton.style.backgroundColor = 'cyan'; // Change color to indicate selection
+    if (button) {
+        const index = selectedCategories.indexOf(category.id);
+        if (index > -1) {
+            // Category is already selected, so unselect it
+            button.classList.remove('active');
+            button.style.backgroundColor = '';
+            selectedCategories.splice(index, 1);
+        } else {
+            // Category is not selected, so select it
+            button.classList.add('active');
+            button.style.backgroundColor = 'cyan';
+            selectedCategories.push(category.id);
+        }
     }
-
-    alert(`Selected category: ${category.name}`);
+    console.log('Selected category IDs:', selectedCategories);
 }
 
 // Function to delete a category
@@ -171,9 +182,10 @@ function deleteCategory(categoryId) {
         chrome.storage.local.set({ categories: updatedCategories }, () => {
             console.log('Category deleted:', categoryId);
             
-            // If Selected Category is deleted, reset currentCategory
-            if (currentCategory && currentCategory.id === categoryId) {
-                currentCategory = '';
+            // If a selected category is deleted, remove it from the selected list
+            const index = selectedCategories.indexOf(categoryId);
+            if (index > -1) {
+                selectedCategories.splice(index, 1);
             }
             
             // Remove the button from the DOM
@@ -185,30 +197,11 @@ function deleteCategory(categoryId) {
                 if (buttonToRemove) {
                     buttonToRemove.remove();
                     console.log('Button removed from DOM:');
-
-                    alert('Selected category has been deleted.');
-
-                    window.location.reload(); // Reload the page to reflect changes
                 }
                 else{
                     console.log('Button not found in DOM for removal.');
                 }
             }
-            
-            
-            // const buttonToRemove = document.querySelectorAll('#category_buttons > div');
-
-            // buttonToRemove.forEach(categoryButton => {
-            //     console.log('in for each section');
-            //     if (categoryButton.dataset.categoryId === categoryId.toString()) {
-            //         categoryButton.remove();
-            //         // window.close(chrome.runtime.getURL("notes.html"), "NoteTaker", "width=600,height=400");
-            //         window.close();
-            //         window.open(chrome.runtime.getURL("notes.html"), "NoteTaker", "width=600,height=400");
-
-            //     }
-            // });
-            // // const buttonToRemove = categoryContainer.querySelector(`[data-category-id="${categoryId}"]`);
         });
     });
 }
