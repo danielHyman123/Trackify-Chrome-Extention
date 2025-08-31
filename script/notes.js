@@ -16,15 +16,6 @@ if (document.getElementById('content')) {
 
     loadCategories();
 
-//Unnecessary code?
-    // Load existing note content when page loads
-    // chrome.storage.local.get(['currentNote'], (result) => {
-    //     if (result.currentNote) {
-    //         contentArea.value = result.currentNote.content;
-    //         titleArea.value = result.currentNote.title;
-    //     }
-    // });
-
     // Category button event listener
     categoryButton.addEventListener('click', createCategory);
 

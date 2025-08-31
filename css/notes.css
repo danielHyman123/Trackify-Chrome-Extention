@@ -1,58 +1,178 @@
-html, body {
-    width: 100vw;
-    height: 100vh;
-    margin: 0;
-    padding: 0;
+/* General Body and Font Styles */
+:root {
+  --primary-color: #007bff;
+  --secondary-color: #6c757d;
+  --danger-color: #dc3545;
+  --light-gray: #f8f9fa;
+  --dark-gray: #343a40;
+  --border-color: #dee2e6;
+  --white: #fff;
+  --shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  --border-radius: 8px;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
 }
 
 body {
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  background-color: var(--light-gray);
+  color: var(--dark-gray);
+  padding: 2rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1.5rem;
+  min-height: 100vh;
 }
 
-.container{
-    display: flex;
-    justify-content: center; /* horizontal centering */
-    align-items: center;     /* vertical centering */
+/* Main Containers */
+#note_container,
+#category_container {
+  background-color: var(--white);
+  padding: 1.5rem;
+  border-radius: var(--border-radius);
+  box-shadow: var(--shadow);
+  width: 100%;
+  max-width: 700px;
+}
 
-    text-align: start;
-    height: 80vh;
-    width: 95vw;
-    box-sizing: border-box;
-    resize: none;
-    line-height: 1.5;
+/* Note Input Section */
+#note_container {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+#title_input,
+#content {
+  width: 100%;
+  padding: 0.75rem;
+  font-size: 1rem;
+  border: 1px solid var(--border-color);
+  border-radius: 4px;
+  transition: border-color 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+}
+
+#title_input::placeholder,
+#content::placeholder {
+  color: #999;
+}
+
+#title_input:focus,
+#content:focus {
+  outline: none;
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.25);
 }
 
 #content {
-    width: 95%;
-    height: 85%;
-    resize: none;
-    line-height: 1.5;
-    box-sizing: border-box;
+  min-height: 250px;
+  resize: vertical;
+  font-family: inherit;
 }
 
-#note_container {
-    height: 100%;
-    width: 100%;
-    display: flex;
-    flex: 9;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    gap: 5px;
+/* Category Section */
+#category_container {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+#category_buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+/* Button General Styles */
+button {
+  padding: 0.75rem 1.5rem;
+  font-size: 1rem;
+  font-weight: 600;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.2s ease, transform 0.1s ease, opacity 0.2s ease;
+  color: var(--white);
+  text-align: center;
+}
+
+button:hover {
+  opacity: 0.85;
+}
+
+button:active {
+  transform: scale(0.98);
+}
+
+/* Specific Buttons */
+#categoryButton {
+  background-color: var(--secondary-color);
+  align-self: flex-start; /* Only takes up its own width */
+}
+
+/* Style for dynamically added category buttons */
+#category_buttons button {
+    background-color: #e9ecef;
+    color: var(--dark-gray);
+    font-weight: 500;
+    padding: 0.5rem 1rem;
+    font-size: 0.9rem;
 }
 
 #button_container {
-    flex: 1;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    gap: 5px;
+  display: flex;
+  justify-content: flex-end;
+  gap: 1rem;
+  width: 100%;
+  max-width: 700px;
 }
 
-#title_input{
-    text-align: center;
-    width: 95%;
+#saveButton {
+  background-color: var(--primary-color);
+}
+
+#deleteButton {
+  background-color: var(--danger-color);
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  body {
+    padding: 1rem;
+    gap: 1rem;
+  }
+
+  #note_container,
+  #category_container,
+  #button_container {
+    padding: 1rem;
+  }
+}
+
+@media (max-width: 480px) {
+  body {
+    padding: 0;
+  }
+
+  #note_container,
+  #category_container {
+    border-radius: 0;
+    box-shadow: none;
+    border-bottom: 1px solid var(--border-color);
+  }
+
+  #button_container {
+    flex-direction: column;
+    padding: 1rem;
+    gap: 0.75rem;
+  }
+
+  #button_container button {
+    width: 100%;
+  }
 }
