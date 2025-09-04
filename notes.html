@@ -1,26 +1,31 @@
-
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Notes</title>
-    <link rel="stylesheet" href="css/notes.css">
-</head>
-<body>
+    <link rel="stylesheet" href="css/notes.css" />
+  </head>
+  <body>
     <div id="note_container">
-        <input id="title_input" type="text" placeholder="Enter your note title">
-        <textarea id="content" class="container" placeholder="Enter your notes here..."></textarea>
+      <input id="title_input" type="text" placeholder="Enter your note title" />
+      <textarea
+        id="content"
+        class="container"
+        placeholder="Enter your notes here..."
+      ></textarea>
     </div>
     <div id="category_container">
+      <div style="display: flex; gap: 10px;">
+        <input id="category_input" type="text" placeholder="Enter category name" style="flex-grow: 1;"/>
         <button id="categoryButton">Create Category</button>
-        <div id="category_buttons"></div>
+      </div>
+      <div id="category_buttons"></div>
     </div>
 
     <div id="button_container">
-        <button id="saveButton">Save</button>
-        <button id="deleteButton">Delete</button>
+      <button id="saveButton">Save</button>
     </div>
     <script src="script/notes.js"></script>
-</body>
+  </body>
 </html>

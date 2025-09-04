@@ -1,60 +1,270 @@
-/*-This css file can later be updated to be used to style the sidebar and index.html files. 
-As of 05/27/2025, this file is not used in any file.
-Instead, the same styling functionalitites are used in injectSidebar.js through sidebar.style
-Additonally the html aspects of the sidebar are through sidebar.innerHTML
-For dependancies and minimizing the amount of code in each file, the css and html aspects of the js files should be dispersed*/
-
-body {
-  margin: 0;
-  font-family: Arial, sans-serif;
+/* Styles for elements OUTSIDE the shadow DOM (in the main page) */
+#toggleSidebar {
+  position: fixed;
+  top: 0;
+  width: 20px; /* Corresponds to TOGGLE_BUTTON_WIDTH_PX in JS */
+  height: 100vh;
+  z-index: 9998;
+  background: #f1f1f1;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+  color: #333;
+  transition: right 0.3s ease;
+  border-left: 1px solid #ccc;
+  border-right: 1px solid #ccc;
 }
 
+#toggleSidebar:hover {
+  background: #e1e1e1;
+}
 
+/* Styles for elements INSIDE the shadow DOM */
 
-
-
-
-
-
-
-/* .sidebar {
+/* :host targets the root element of the shadow DOM (#myExtensionSidebar) */
+:host {
   position: fixed;
   top: 0;
   right: 0;
-  width: 250;
   height: 100vh;
-  background-color: #555;
-  color: white;
-  padding: 10px;
+  background-color: #f8f9fa; /* A light, neutral background */
+  border-left: 1px solid #dee2e6;
   z-index: 9999;
-  margin-left: 0px;
-} */
-/*
-.sidebar button {
-  background-color: #4CAF50;
-  color: white;
-  border: none;
-  padding: 10px;
-  text-align: center;
-  text-decoration: none;
+  overflow-y: auto;
   display: block;
-  margin: 10px auto;
-  cursor: pointer;
-  width: 80%;
-  font-size: 16px;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  color: #212529;
+  font-size: 14px;
+  box-sizing: border-box;
 }
 
-#toggleButton {
-  position: fixed;
-  top: 20px;
-  right: 270px;
-  padding: 50px 15px;   
-  font-size: 16px;
-  background-color: #4CAF50;
-  color: white;
-  border: none;
-  border-radius: 5px;
-  cursor: pointer;
-  z-index: 10000;
+/* A simple reset for elements inside the shadow DOM */
+* {
+  box-sizing: border-box;
 }
- */
+
+h1, h2, p {
+  margin: 0;
+  padding: 0;
+  font-weight: normal;
+}
+
+button, input, textarea {
+  font-family: inherit;
+  font-size: inherit;
+}
+
+/* Main content container */
+#contentContainer, #noteContainer {
+  padding: 15px;
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  height: 100%;
+}
+
+.top-wrapper {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+h1 {
+  font-size: 20px;
+  font-weight: 600;
+}
+
+#plusButton {
+  border: none;
+  background: #007bff;
+  color: white;
+  padding: 8px 12px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
+  transition: background-color 0.2s, box-shadow 0.2s;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+#plusButton:hover {
+  background: #0056b3;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+}
+
+#contentContainer > p {
+  font-size: 12px;
+  color: #6c757d;
+}
+
+#searchBar {
+  width: 100%;
+  padding: 8px;
+  border-radius: 4px;
+  border: 1px solid #dee2e6;
+}
+
+#notesContainer {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  overflow-y: auto;
+  flex-grow: 1;
+}
+
+.markWrapper {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-radius: 4px;
+  background-color: #fff;
+  border: 1px solid #e9ecef;
+}
+
+.note-button {
+  flex-grow: 1;
+  text-align: left;
+  padding: 12px 10px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  color: #212529;
+}
+
+.note-button:hover {
+  background-color: #f1f3f5;
+}
+
+.delete-button {
+  background: transparent;
+  border: none;
+  color: #adb5bd;
+  cursor: pointer;
+  font-size: 18px;
+  padding: 0 10px;
+  line-height: 1;
+}
+
+.delete-button:hover {
+  color: #dc3545;
+}
+
+/* Note Edit View */
+#noteContainer {
+  display: none; /* Hidden by default, JS will toggle to 'flex' */
+}
+
+.top-container {
+  display: flex;
+  align-items: center;
+}
+
+#backButton {
+  border: none;
+  background: transparent;
+  font-size: 24px;
+  cursor: pointer;
+  padding: 0 10px 0 0;
+  color: #6c757d;
+}
+
+#backButton:hover {
+  color: #212529;
+}
+
+#noteTitle {
+  font-size: 18px;
+  font-weight: 600;
+  flex-grow: 1;
+  border: none;
+  outline: none;
+  padding: 4px;
+  background-color: transparent;
+}
+
+#noteTitle:focus {
+  background-color: #e9ecef;
+  border-radius: 4px;
+  padding: 8px;
+}
+
+.category-container {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.category-container p {
+  font-size: 12px;
+  color: #6c757d;
+}
+
+#noteCategory {
+  flex-grow: 1;
+  padding: 6px;
+  border-radius: 4px;
+  border: 1px solid #dee2e6;
+}
+
+#noteContent {
+  flex-grow: 1;
+  width: 100%;
+  padding: 8px;
+  border-radius: 4px;
+  border: 1px solid #dee2e6;
+  resize: vertical;
+}
+
+#websiteBtnContainer {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+#urlBtn {
+  background-color: #e9ecef;
+  border: 1px solid #dee2e6;
+  padding: 5px 10px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 12px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 150px;
+}
+
+#aBtn {
+  font-size: 12px;
+  text-decoration: none;
+  color: #007bff;
+}
+
+#aBtn:hover {
+  text-decoration: underline;
+}
+
+#noteSaveButton {
+  width: 100%;
+  padding: 10px;
+  border: none;
+  border-radius: 4px;
+  background: #28a745;
+  color: white;
+  cursor: pointer;
+  margin-top: 10px;
+  font-size: 14px;
+  font-weight: 500;
+  transition: background-color 0.2s, box-shadow 0.2s;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+#noteSaveButton:hover {
+  background: #218838;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+}
